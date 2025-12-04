@@ -1,0 +1,8 @@
+# Git tarafından izlenmemesi gereken dosyalar
+/vendor/
+/debug.log
+/scraper.log
+/user.json
+/notices.json
+/new_notices.json
+/config.php

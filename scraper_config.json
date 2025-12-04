@@ -1,0 +1,38 @@
+{
+    "충남대학교": {
+        "encoding": "UTF-8",
+        "list_selector": "\/\/tbody\/tr",
+        "title_selector": ".\/\/td[2]\/a",
+        "date_selector": ".\/\/td[4]"
+    },
+    "사업단": {
+        "encoding": "UTF-8",
+        "list_selector": "\/\/tbody\/tr",
+        "title_selector": ".\/\/td[2]\/a",
+        "date_selector": ".\/\/td[4]"
+    },
+    "교육정보": {
+        "encoding": "UTF-8",
+        "list_selector": "\/\/tbody\/tr",
+        "title_selector": ".\/\/td[2]\/a",
+        "date_selector": ".\/\/td[4]"
+    },
+    "학사정보": {
+        "encoding": "UTF-8",
+        "list_selector": "\/\/tbody\/tr",
+        "title_selector": ".\/\/td[2]\/a",
+        "date_selector": ".\/\/td[4]"
+    },
+    "경제학과": {
+        "encoding": "UTF-8",
+        "list_selector": "div.al_box",
+        "title_selector": "a",
+        "date_selector": "span.b-date"
+    },
+    "채용": {
+        "encoding": "UTF-8",
+        "list_selector": "tbody",
+        "title_selector": "a",
+        "date_selector": "td.date"
+    }
+}

@@ -1,0 +1,9 @@
+<?php
+return [
+    'smtp_host' => 'smtp.gmail.com',
+    'smtp_port' => 587,
+    'smtp_username' => 'your_email@gmail.com', // Replace with your Gmail address
+    'smtp_password' => 'your_app_password', // Replace with your Gmail App Password
+    'smtp_from_address' => 'your_email@gmail.com', // Replace with your Gmail address
+    'smtp_from_name' => '공지사항 알리미'
+];

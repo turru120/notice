@@ -1,0 +1,314 @@
+:root {
+    --theme-color-primary: #007BFF;
+    --theme-color-primary-hover: #0056b3;
+    --theme-color-primary-text: #ffffff;
+    --theme-color-accent: #273AC3;
+    --site-bg-color: #ffffff;
+    --content-bg-color: #ffffff;
+    --content-bg-alt: #f9f9f9;
+    --main-text-color: #333;
+    --border-color-strong: #000000;
+    --border-color-soft: #ddd;
+    --content-max-width: 900px;
+}
+
+body {
+    font-family: 'Malgun Gothic', sans-serif !important;
+    font-weight: 400 !important;
+    margin: 0;
+    padding: 20px;
+    background-color: #ffffff;
+}
+
+header {
+    
+    text-align: center;
+    font-size: 25px;
+    padding: 20px 0;
+    color: #333;
+}
+
+header h1 a {
+    font-weight: 900 !important;
+    color: inherit;
+    text-decoration: none;
+}
+
+
+nav > ul {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    list-style-type: none;
+    padding: 0;
+    margin: 20px 0 40px 0;
+}
+
+nav li {
+    margin: 0 25px;
+}
+
+nav img {
+
+    width: 150px;
+    height: 60px;
+    transition: transform 0.2s;
+}
+
+nav img:hover {
+    transform: scale(1.05);
+}
+
+.nav-item.dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0;
+}
+
+a.nav-link.nav-settings-icon {
+    font-size: 2.0rem;
+    color: var(--main-text-color, #333);
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+a.nav-link.nav-settings-icon::after {
+    display: none;
+}
+
+a.nav-link.nav-settings-icon:hover {
+    color: #000;
+}
+
+.main-title-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60px;
+    margin-bottom: 1rem;
+}
+
+
+aside {
+    background-color: #ffffff;
+    padding: 10px;
+    margin: 20px auto;
+    max-width: 900px;
+}
+
+aside h2 {
+    margin-top: 0;
+}
+
+aside span {
+    color: #273AC3;
+    display: block;
+}
+
+h2 {
+    font-size: 1.5rem !important;
+    font-weight: 900 !important;
+}
+
+.search-section {
+    padding: 10px;
+    margin: 20px auto;
+    max-width: 900px;
+}
+
+.results-section {
+    padding: 10px;
+    margin: 20px auto;
+    max-width: 900px;
+}
+
+table {
+    width: 100%;
+    max-width: 900px;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background-color: #fff;
+}
+
+th,
+td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+    font-size: 0.8em;
+}
+
+.table > thead.blue-header {
+    background-color: #007BFF !important;
+    color: white;
+}
+
+
+td a {
+    text-decoration: none;
+    color: #333;
+}
+
+td a:hover {
+    text-decoration: underline;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+
+#calendar-container table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+#calendar-container th,
+#calendar-container td {
+    border: 1px solid #000000;
+    padding: 8px;
+    text-align: center;
+    vertical-align: top;
+    height: 120px;
+    cursor: pointer;
+}
+
+#calendar-container th {
+    background-color: #0d6efd;
+    height: auto;
+    cursor: default;
+}
+
+#calendar-container td:hover {
+    background-color: #e9ecef;
+}
+
+.today {
+    font-weight: bold;
+}
+
+.other-month {
+    color: #ccc;
+    background-color: #faf9f8 !important;
+    cursor: default !important;
+}
+
+.schedule-item {
+    color: white;
+    font-size: 0.75em;
+    padding: 2px 5px;
+    border-radius: 4px;
+    margin-top: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+
+.schedule-item:hover {
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+#schedule-list-container th {
+    text-align: center;
+}
+
+.highlight {
+    background-color: #fff3cd !important;
+}
+
+
+footer {
+    text-align: center;
+    margin-top: 40px;
+    padding: 20px 0;
+    color: #777;
+    border-top: 1px solid #ddd;
+    font-size: 0.8em;
+}
+
+
+.login-screen-container {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 30px;
+
+    border: 1px solid var(--border-color-soft);
+    background-color: var(--content-bg-color);
+
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+}
+
+.login-logo-area h2 {
+    display: inline-block;
+
+    border: 1px solid var(--border-color-strong);
+
+    padding: 10px 20px;
+    margin: 0;
+    font-size: 22px;
+    color: var(--main-text-color);
+}
+
+.login-form-row {
+    display: flex;
+    align-items: stretch;
+}
+
+.login-input-group {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.login-input-group input {
+    padding: 12px;
+    font-size: 16px;
+
+    border: 1px solid var(--border-color-soft);
+
+    background-color: var(--content-bg-color);
+    color: var(--main-text-color);
+}
+
+.login-input-group input[type="text"] {
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+}
+
+.login-input-group input[type="password"] {
+    border-radius: 0 0 4px 4px;
+}
+
+.login-button {
+    background-color: var(--theme-color-primary);
+    color: var(--theme-color-primary-text);
+    border: 1px solid var(--border-color-strong);
+    font-size: 18px;
+    font-weight: bold;
+    padding: 0 25px;
+    margin-left: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.login-button:hover {
+    background-color: var(--theme-color-primary-hover);
+}
+
+.btn-xsm {
+    padding: 0.1rem 0.3rem;
+    font-size: 0.7rem;
+    line-height: 1.2;
+    border-radius: 0.2rem;
+}
