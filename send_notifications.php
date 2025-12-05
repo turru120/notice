@@ -88,8 +88,6 @@ foreach ($users as $user) {
     if (!empty($notices_for_user)) {
         $to = $user['email'];
         $subject = "[공지사항] " . count($notices_for_user) . "개의 새로운 공지사항이 있습니다.";
-
-        // 이메일 본문 내용
         $message = "안녕하세요, " . $user['name'] . "님.\n\n";
         $message .= "즐겨찾기한 사이트에 새로운 공지사항이 등록되었습니다.\n\n";
 

@@ -216,19 +216,6 @@ tbody tr:hover {
     text-align: center;
 }
 
-.highlight {
-    background-color: #fff3cd !important;
-}
-
-footer {
-    text-align: center;
-    margin-top: 40px;
-    padding: 20px 0;
-    color: #777;
-    border-top: 1px solid #ddd;
-    font-size: 0.8em;
-}
-
 .login-screen-container {
     max-width: 500px;
     margin: 40px auto;
@@ -300,6 +287,19 @@ footer {
 
 .login-button:hover {
     background-color: var(--theme-color-primary-hover);
+}
+
+.highlight {
+    background-color: #fff3cd !important;
+}
+
+footer {
+    text-align: center;
+    margin-top: 40px;
+    padding: 20px 0;
+    color: #777;
+    border-top: 1px solid #ddd;
+    font-size: 0.8em;
 }
 
 .btn-xsm {
