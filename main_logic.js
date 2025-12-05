@@ -3,10 +3,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentDate = new Date();
     let currentScheduleId = null;
 
-    // ADDED: Function to get user-specific localStorage key
     function getCalendarKey() {
         const userId = localStorage.getItem('current_user_id');
         return `calendar_schedules_${userId || 'guest'}`;
+    }
+
+    function getCategoriesKey() {
+        const userId = localStorage.getItem('current_user_id');
+        return `managed_categories_${userId || 'guest'}`;
     }
 
     function formatDate(dateString) {
@@ -51,8 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function populateCategoryFilter() {
-        const CATEGORIES_STORAGE_KEY = 'managed_categories';
-        const storedCategories = localStorage.getItem(CATEGORIES_STORAGE_KEY);
+        const storedCategories = localStorage.getItem(getCategoriesKey());
         const categories = storedCategories ? JSON.parse(storedCategories) : ['수업', '장학', '행사', '기타'];
 
         searchCategorySelect.innerHTML = '<option value="">전체</option>';
@@ -65,8 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function populateModalCategoryDropdowns() {
-        const CATEGORIES_STORAGE_KEY = 'managed_categories';
-        const storedCategories = localStorage.getItem(CATEGORIES_STORAGE_KEY);
+        const storedCategories = localStorage.getItem(getCategoriesKey());
         const categories = storedCategories ? JSON.parse(storedCategories) : ['수업', '장학', '행사', '기타'];
 
         const dropdowns = [scheduleCategoryInput, detailsEditCategorySelect];
@@ -329,9 +331,12 @@ document.addEventListener('DOMContentLoaded', () => {
     cancelEditBtn.addEventListener('click', closeDetailsModal);
 
     window.addEventListener('storage', (e) => {
-        if (e.key === 'managed_categories') {
+        if (e.key === getCategoriesKey()) {
             populateCategoryFilter();
             populateModalCategoryDropdowns();
+        }
+        if (e.key === getCalendarKey()) {
+            initialize();
         }
     });
 
