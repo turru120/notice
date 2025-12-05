@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // DOM 요소 참조
     const feedContainer = document.getElementById('announcements-feed-container');
     const paginationContainer = document.getElementById('pagination-container');
     const refreshBtn = document.getElementById('refresh-btn');
@@ -12,13 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return `calendar_schedules_${userId || 'guest'}`;
     }
 
+    // 모든 공지사항을 비동기적으로 불러와 처리
     async function fetchAllAnnouncements() {
-        feedContainer.innerHTML = '<p class="text-center text-muted">공지사항을 불러오는 중</p>';
+        feedContainer.innerHTML = '<p class="text-center text-muted">공지사항 불러오는 중</p>';
 
         try {
             const userId = localStorage.getItem('current_user_id');
             if (!userId) throw new Error("로그인 정보가 없습니다. 다시 로그인해주세요.");
 
+            // 사용자가 등록한 사이트 정보 불러오기
             const sitesResponse = await fetch(`get_sites.php?user_id=${userId}&t=${new Date().getTime()}`);
             if (!sitesResponse.ok) {
                 throw new Error(`사이트 정보를 불러오는데 실패했습니다: ${sitesResponse.status}`);
@@ -28,14 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const colorMap = new Map(sites.map(site => [site.site_name, site.color]));
             const subscribedSiteNames = new Set(sites.map(site => site.site_name));
 
+            // 공지사항 데이터 불러오기
             const noticesResponse = await fetch('notices.json?t=' + new Date().getTime());
             if (!noticesResponse.ok) {
                 throw new Error(`공지사항 목록을 불러오는데 실패했습니다: ${noticesResponse.status}`);
             }
             const noticeData = await noticesResponse.json();
-
             const filteredData = noticeData.filter(item => subscribedSiteNames.has(item.site));
-
             const processedData = filteredData.map(item => ({
                 ...item,
                 color: colorMap.get(item.site) || '#6c757d'
@@ -45,11 +47,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return allAnnouncements;
 
         } catch (error) {
-            feedContainer.innerHTML = `<p class="text-center text-danger">공지사항을 불러오는데 실패했습니다: ${error.message}</p>`;
+            feedContainer.innerHTML = `<p class="text-center text-danger">공지사항을 불러오는데 실패했습니다: ${error.message}</p>`; // 에러 메시지 표시
             return [];
         }
     }
 
+    // 공지사항 목록을 UI에 렌더링
     function renderFeed(announcements, page) {
         feedContainer.innerHTML = '';
         if (!announcements || announcements.length === 0) {
@@ -61,9 +64,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const endIndex = startIndex + itemsPerPage;
         const paginatedAnnouncements = announcements.slice(startIndex, endIndex);
 
+        // 달력에 이미 추가된 일정 ID 목록 가져오기
         const calendarSchedules = JSON.parse(localStorage.getItem(getCalendarKey())) || [];
         const calendarScheduleIds = new Set(calendarSchedules.map(s => s.id));
 
+        // 공지사항 카드 생성
         const feedHtml = paginatedAnnouncements.map(ann => {
             const isAdded = calendarScheduleIds.has(ann.id);
             return `
@@ -89,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         feedContainer.innerHTML = feedHtml;
     }
 
+    // 페이지네이션 컨트롤을 UI에 렌더링
     function renderPagination(totalItems) {
         paginationContainer.innerHTML = '';
         const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -116,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         paginationContainer.innerHTML = paginationHtml;
     }
 
+    // 공지사항을 달력 일정에 추가
     function addToCalendar(announcementId) {
         const announcementToAdd = allAnnouncements.find(ann => ann.id === announcementId);
         if (!announcementToAdd) return;
@@ -140,6 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 공지사항을 불러오고 UI 렌더링
     async function initialize() {
         currentPage = 1;
         const announcements = await fetchAllAnnouncements();
@@ -147,6 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPagination(announcements.length);
     }
 
+    // 새로고침 및 스크래퍼 실행
     async function handleRefreshAndScrape() {
         const originalButtonText = refreshBtn.textContent;
         refreshBtn.disabled = true;
