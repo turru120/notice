@@ -6,6 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return `managed_categories_${userId || 'guest'}`;
     }
 
+    function getCalendarKey() {
+        const userId = localStorage.getItem('current_user_id');
+        return `calendar_schedules_${userId || 'guest'}`;
+    }
+
     const categoryList = document.getElementById('category-list');
     const newCategoryInput = document.getElementById('new-category-input');
     const addCategoryBtn = document.getElementById('add-category-btn');
@@ -36,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 mypageUserName.innerHTML = `이름 : ${user.name || '사용자'}`;
             }
 
-            // Update the existing P tag with id="user-id-display"
             const userIdDisplayElement = document.getElementById('user-id-display');
             if (userIdDisplayElement) {
                 userIdDisplayElement.textContent = `회원번호 : ${user.id}`;
@@ -121,12 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!sitesListUl) return;
         sitesListUl.innerHTML = '';
 
-        // `allSites`는 `loadUserData`를 통해 `user.json`에서 가져온 사이트 객체 배열입니다.
-        // 이제 이 객체들은 `receiveNotification` 속성을 포함할 수 있습니다.
-
         if (isSitesEditMode) {
             allSites.forEach(site => {
-                // `receiveNotification` 속성이 설정되지 않은 경우를 대비하여 기본값을 false로 간주합니다.
                 const isChecked = site.receiveNotification === true;
                 const li = document.createElement('li');
                 li.className = 'list-group-item';
@@ -134,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 sitesListUl.appendChild(li);
             });
         } else {
+            // [보완] 편집 모드가 아닐 때 사용자가 알림을 받기로 설정한 사이트만 표시 - 사용자 편의성 향상
             const sitesToDisplay = allSites.filter(site => site.receiveNotification === true);
             if (sitesToDisplay.length > 0) {
                 sitesToDisplay.forEach(site => {
@@ -167,6 +168,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 categories = categories.filter(cat => cat !== categoryToDelete);
                 saveCategories();
                 renderCategories();
+
+                // [보완] 삭제된 분류를 사용하던 모든 일정의 분류를 리셋 - 사용자 편의성 향상
+                const calendarKey = getCalendarKey();
+                const storedSchedules = localStorage.getItem(calendarKey);
+                let allSchedules = storedSchedules ? JSON.parse(storedSchedules) : [];
+
+                let schedulesModified = false;
+                allSchedules.forEach(schedule => {
+                    if (schedule.category === categoryToDelete) {
+                        schedule.category = '';
+                        schedulesModified = true;
+                    }
+                });
+
+                if (schedulesModified) {
+                    localStorage.setItem(calendarKey, JSON.stringify(allSchedules));
+                }
             }
         }
     }
@@ -212,9 +230,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function toggleSitesEditMode() {
-        if (isSitesEditMode) { // 편집 모드에서 '완료'를 누른 경우
+        if (isSitesEditMode) {
             isSitesEditMode = false;
-            editSitesBtn.textContent = '저장 중...';
+            editSitesBtn.textContent = '저장 중';
             editSitesBtn.disabled = true;
 
             const selectedIds = Array.from(document.querySelectorAll('.site-checkbox:checked')).map(cb => Number(cb.value));
@@ -231,7 +249,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error(result.message || 'Failed to save settings.');
                 }
                 
-                // 서버 저장이 성공하면, 전체 데이터를 다시 로드하는 대신 로컬 데이터를 업데이트하여 UI를 즉시 갱신합니다.
                 allSites.forEach(site => {
                     site.receiveNotification = selectedIds.includes(site.id);
                 });
@@ -244,15 +261,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 editSitesBtn.disabled = false;
                 editSitesBtn.classList.remove('btn-success');
                 editSitesBtn.classList.add('btn-outline-secondary');
-                renderSitesList(); // 편집이 끝났으므로, 목록을 다시 렌더링합니다.
+                renderSitesList();
             }
 
-        } else { // '편집' 버튼을 누른 경우
+        } else {
             isSitesEditMode = true;
             editSitesBtn.textContent = '완료';
             editSitesBtn.classList.add('btn-success');
             editSitesBtn.classList.remove('btn-outline-secondary');
-            renderSitesList(); // 편집 모드로 목록을 다시 렌더링합니다.
+            renderSitesList();
         }
     }
 
@@ -272,6 +289,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (editSitesBtn) {
             editSitesBtn.addEventListener('click', toggleSitesEditMode);
+        }
+
+        //[보완] 새 분류 이름 입력 필드에서 Enter 키로 분류 추가 기능 실행 - 사용자 편의성 향상
+        if (newCategoryInput) {
+            newCategoryInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') {
+                    handleAddCategory();
+                }
+            });
         }
         
         if (categoryList) {
