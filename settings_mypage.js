@@ -49,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
             allSites = user.registered_sites || [];
 
         } catch (error) {
-            console.error("Error loading user data:", error);
             if(mypageUserName) {
                 mypageUserName.innerHTML = '사용자 정보 로딩 실패';
             }
@@ -224,7 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleEmailEditMode();
 
         } catch (error) {
-            console.error('Error saving email:', error);
             alert(`이메일 저장에 실패했습니다: ${error.message}`);
         }
     }
@@ -254,7 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
             } catch (error) {
-                console.error('Error saving notification sites:', error);
                 alert(`알림 사이트 설정 저장에 실패했습니다: ${error.message}`);
             } finally {
                 editSitesBtn.textContent = '편집';
