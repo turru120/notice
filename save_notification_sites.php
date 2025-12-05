@@ -10,6 +10,7 @@ try {
 
     $request_data = json_decode(file_get_contents('php://input'), true);
 
+    // 필수 데이터 존재 여부 확인
     if (!isset($request_data['userId']) || !isset($request_data['siteIds'])) {
         throw new Exception('User ID or Site IDs not provided.');
     }
@@ -21,6 +22,7 @@ try {
         throw new Exception('Site IDs must be an array.');
     }
 
+    // 사용자 데이터 파일 존재 여부 확인
     if (!file_exists($user_file)) {
         throw new Exception('User data file not found.');
     }
@@ -30,6 +32,7 @@ try {
     }
 
     $user_found = false;
+    // 사용자의 등록 사이트 알림 설정 업데이트
     foreach ($users_data as &$user) {
         if ($user['id'] === $current_user_id) {
             $user_found = true;
@@ -46,6 +49,7 @@ try {
         throw new Exception('User not found.');
     }
 
+    // 변경된 사용자 데이터를 JSON 파일에 저장
     if (file_put_contents($user_file, json_encode($users_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) === false) {
         throw new Exception('Failed to save user data.');
     }
@@ -56,4 +60,5 @@ try {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
+
 ?>

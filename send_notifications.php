@@ -4,6 +4,7 @@ use PHPMailer\PHPMailer\Exception;
 
 require 'vendor/autoload.php';
 
+// 이메일 전송 설정을 포함하는 설정 파일
 $config = require 'config.php';
 
 ini_set('display_errors', 1);
@@ -22,6 +23,7 @@ function write_log($message)
 
 write_log("Notification script started.");
 
+// 새로 스크랩된 공지사항 파일 존재 여부 확인 
 if (!file_exists($new_notices_file)) {
     write_log("new_notices.json not found. Exiting.");
     exit;
@@ -35,6 +37,7 @@ if (json_last_error() !== JSON_ERROR_NONE || !is_array($new_notices)) {
     exit;
 }
 
+// 보낼 새로운 공지사항이 없는 경우
 if (empty($new_notices)) {
     write_log("No new notices to send. Exiting.");
     exit;
@@ -42,6 +45,7 @@ if (empty($new_notices)) {
 
 write_log(count($new_notices) . " new notices found. Proceeding with notification process.");
 
+// 사용자 데이터 파일 존재 여부 확인 및 로드
 if (!file_exists($user_file)) {
     write_log("Error: user.json not found. Exiting.");
     exit;
@@ -54,13 +58,14 @@ if (json_last_error() !== JSON_ERROR_NONE) {
 
 // 모든 사용자를 순회하며 알림을 보낼지 결정
 foreach ($users as $user) {
+    // 사용자가 이메일을 받을 조건 확인
     if (empty($user['notification']) || empty($user['email']) || empty($user['registered_sites'])) {
         continue;
     }
 
     write_log("Checking notifications for user: " . $user['id']);
 
-    // 사용자가 알림을 받기로 설정한 사이트 목록 생성
+    // 사용자가 알림을 받기로 설정한 사이트 목록 필터링
     $notification_sites = [];
     if (!empty($user['registered_sites'])) {
         foreach ($user['registered_sites'] as $site) {
@@ -70,6 +75,7 @@ foreach ($users as $user) {
         }
     }
 
+    // 알림을 보낼 사이트가 없는 경우 다음 사용자로 이동
     if (empty($notification_sites)) {
         write_log("User " . $user['id'] . " has no sites enabled for notifications. Skipping.");
         continue;
@@ -131,6 +137,7 @@ foreach ($users as $user) {
     }
 }
 
+// 모든 이메일 발송 후 new_notices.json  초기화
 file_put_contents($new_notices_file, json_encode([], JSON_PRETTY_PRINT));
 write_log("Cleared new_notices.json.");
 
