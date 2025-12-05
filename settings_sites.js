@@ -17,6 +17,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let sites = [];
     let isEditMode = false;
+    const defaultColors = [
+        '#007BFF', // Bootstrap primary
+        '#28A745', // Bootstrap success
+        '#DC3545', // Bootstrap danger
+        '#FFC107', // Bootstrap warning
+        '#17A2B8', // Bootstrap info
+        '#6610f2', // Purple
+        '#fd7e14', // Orange
+        '#e83e8c', // Pink
+        '#20c997'  // Teal
+    ];
 
     async function loadSites() {
         try {
@@ -31,7 +42,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const serverSites = user.registered_sites || [];
             
             sites = serverSites.map((site, index) => {
-                const defaultColors = ['#007BFF', '#28A745', '#DC3545', '#FFC107', '#17A2B8'];
                 return {
                     id: site.id || Date.now() + index,
                     name: site.site_name,
@@ -45,7 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             renderTable();
         } catch (error) {
-            console.error("Error loading sites:", error);
             tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">사이트 목록을 불러오는데 실패했습니다.</td></tr>`;
         }
     }
@@ -113,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
         } catch (error) {
-            console.error("Error saving sites:", error);
             alert('사이트 목록 저장에 실패했습니다.');
         }
     }
@@ -217,6 +225,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 site.notice_date_selector = dateSelector;
             }
         } else {
+            // 새 사이트 추가 시 기본 색상 할당
+            // defaultColors 배열에서 현재 등록된 사이트 수에 따라 순환하며 색상을 선택합니다.
+            // 이렇게 하면 새로 추가되는 사이트에 다양한 기본 색상이 부여됩니다.
+            const newColor = defaultColors[sites.length % defaultColors.length];
             sites.push({
                 id: Date.now(),
                 name: name,
@@ -225,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 notice_title_selector: titleSelector,
                 notice_date_selector: dateSelector,
                 isFavorite: false,
-                color: '#000000'
+                color: newColor
             });
         }
         await saveSites();
