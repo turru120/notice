@@ -11,13 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return `calendar_schedules_${userId || 'guest'}`;
     }
 
+    // DOM 요소 참조 (주요 UI 컴포넌트)
     const categoryList = document.getElementById('category-list');
     const newCategoryInput = document.getElementById('new-category-input');
     const addCategoryBtn = document.getElementById('add-category-btn');
     const emailSection = document.getElementById('email-section');
     const sitesListUl = document.getElementById('notification-sites-list');
     const editSitesBtn = document.getElementById('edit-sites-btn');
-    
 
     let allSites = [];
     let userEmail = '';
@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isSitesEditMode = false;
     let isEmailEditMode = false;
 
+    // 사용자 데이터를 서버에서 불러와 화면에 표시
     async function loadUserData() {
         try {
             const userId = localStorage.getItem('current_user_id');
@@ -36,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const user = await response.json();
-            
+
             if(mypageUserName) {
                 mypageUserName.innerHTML = `이름 : ${user.name || '사용자'}`;
             }
@@ -55,15 +56,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 로컬 스토리지에서 카테고리 목록을 불러옴
     function loadCategories() {
         const storedCategories = localStorage.getItem(getCategoriesKey());
-        categories = storedCategories ? JSON.parse(storedCategories) : ['수업', '장학', '행사', '기타'];
+        categories = storedCategories ? JSON.parse(storedCategories) : ['수업', '장학', '행사', '기타']; // 기본 카테고리
     }
 
+    // 카테고리 목록을 로컬 스토리지에 저장
     function saveCategories() {
         localStorage.setItem(getCategoriesKey(), JSON.stringify(categories));
     }
 
+    // 카테고리 목록을 UI에 렌더링
     function renderCategories() {
         if (!categoryList) return;
         categoryList.innerHTML = '';
@@ -74,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const categoryContent = document.createElement('div');
             categoryContent.className = 'd-flex align-items-center';
-            
+
             const handle = document.createElement('i');
             handle.className = 'bi bi-grip-vertical me-2';
             handle.style.cursor = 'grab';
@@ -84,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             categoryContent.appendChild(handle);
             categoryContent.appendChild(name);
-            
+
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'btn btn-danger btn-sm py-0';
             deleteBtn.textContent = '삭제';
@@ -97,10 +101,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // 이메일 설정 섹션
     function renderEmailSection() {
         if (!emailSection) return;
         emailSection.innerHTML = '';
         if (isEmailEditMode) {
+            // 이메일 편집 모드
             emailSection.innerHTML = `
                 <div class="flex-grow-1 me-3">
                     <input type="email" id="email-input" class="form-control form-control-sm" value="${userEmail}">
@@ -109,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             document.getElementById('save-email-btn').addEventListener('click', handleSaveEmail);
         } else {
+            // 이메일 보기 모드
             emailSection.innerHTML = `
                 <div>
                     <span class="text-muted">알림 받을 이메일 : </span>
@@ -120,11 +127,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 알림 받을 사이트 목록 섹션
     function renderSitesList() {
         if (!sitesListUl) return;
         sitesListUl.innerHTML = '';
 
         if (isSitesEditMode) {
+            // 사이트 편집 모드
             allSites.forEach(site => {
                 const isChecked = site.receiveNotification === true;
                 const li = document.createElement('li');
@@ -147,7 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-    
+
+    // 새 카테고리 추가
     function handleAddCategory() {
         const newCategory = newCategoryInput.value.trim();
         if (newCategory && !categories.includes(newCategory)) {
@@ -160,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 카테고리 삭제
     function handleDeleteCategory(e) {
         if (e.target.dataset.category) {
             const categoryToDelete = e.target.dataset.category;
@@ -188,11 +199,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 이메일 편집 모드를 토글
     function toggleEmailEditMode() {
         isEmailEditMode = !isEmailEditMode;
         renderEmailSection();
     }
 
+    // 변경된 이메일 주소를 서버에 저장
     async function handleSaveEmail() {
         const emailInput = document.getElementById('email-input');
         const newEmail = emailInput.value.trim();
@@ -227,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-     // '알림 받을 사이트 목록'의 편집/완료 버튼을 눌렀을 때 실행
+    // 알림 받을 사이트 목록의 편집/완료 버튼을 눌렀을 때 실행
     async function toggleSitesEditMode() {
         if (isSitesEditMode) {
             isSitesEditMode = false;
@@ -248,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!response.ok || !result.success) {
                     throw new Error(result.message || 'Failed to save settings.');
                 }
-                
+
                 allSites.forEach(site => {
                     site.receiveNotification = selectedIds.includes(site.id);
                 });
@@ -272,6 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 마이페이지 초기화
     async function init() {
         await loadUserData();
         loadCategories();
@@ -298,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-        
+
         if (categoryList) {
             new Sortable(categoryList, {
                 animation: 150,
