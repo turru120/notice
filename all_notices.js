@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const userId = localStorage.getItem('current_user_id');
             if (!userId) throw new Error("로그인 정보가 없습니다. 다시 로그인해주세요.");
 
-            // 1. Get user's subscribed sites for filtering and color mapping
             const sitesResponse = await fetch(`get_sites.php?user_id=${userId}&t=${new Date().getTime()}`);
             if (!sitesResponse.ok) {
                 throw new Error(`사이트 정보를 불러오는데 실패했습니다: ${sitesResponse.status}`);
@@ -29,17 +28,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const colorMap = new Map(sites.map(site => [site.site_name, site.color]));
             const subscribedSiteNames = new Set(sites.map(site => site.site_name));
 
-            // 2. Fetch all notices
             const noticesResponse = await fetch('notices.json?t=' + new Date().getTime());
             if (!noticesResponse.ok) {
                 throw new Error(`공지사항 목록을 불러오는데 실패했습니다: ${noticesResponse.status}`);
             }
             const noticeData = await noticesResponse.json();
             
-            // 3. Filter notices to show only those from subscribed sites
             const filteredData = noticeData.filter(item => subscribedSiteNames.has(item.site));
 
-            // 4. Process filtered data by adding color info
             const processedData = filteredData.map(item => ({
                 ...item,
                 color: colorMap.get(item.site) || '#6c757d'
@@ -49,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return allAnnouncements;
 
         } catch (error) {
-            console.error("Error fetching announcements:", error);
             feedContainer.innerHTML = `<p class="text-center text-danger">공지사항을 불러오는데 실패했습니다: ${error.message}</p>`;
             return [];
         }
@@ -99,7 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalPages = Math.ceil(totalItems / itemsPerPage);
         if (totalPages <= 1) return;
 
-        const maxPageNumbers = 10;
+        // [보완] 페이지네이션 바에 페이지 번호 수 표시되는 방식 변경 - 사용자 편의성 향상
+        // 페이지네이션 바에 한 번에 표시될 최대 페이지 번호 수 10-> 5로 줄이고, 현재 페이지를 중심으로 총 5개 표시
+        const maxPageNumbers = 5; 
         let startPage = Math.max(1, currentPage - Math.floor(maxPageNumbers / 2));
         let endPage = Math.min(totalPages, startPage + maxPageNumbers - 1);
 
@@ -144,7 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function initialize() {
-        // Reset current page to 1 to show the latest data first
         currentPage = 1; 
         const announcements = await fetchAllAnnouncements();
         renderFeed(announcements, currentPage);
@@ -154,10 +150,10 @@ document.addEventListener('DOMContentLoaded', () => {
     async function handleRefreshAndScrape() {
         const originalButtonText = refreshBtn.textContent;
         refreshBtn.disabled = true;
-        refreshBtn.textContent = '스크랩 중...';
+        //[추가] 스크랩 중 버튼 텍스트 '스크랩 중'으로 변경 - 사용자 이해도 향상
+        refreshBtn.textContent = '스크랩 중';
 
         try {
-            // Step 1: Call the scraper
             const response = await fetch('run_scraper.php', {
                 method: 'POST',
                 headers: {
@@ -170,16 +166,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             const result = await response.json();
-            console.log('Scraper result:', result); // For debugging
             
-            // Step 2: Re-initialize the feed to show new data
             await initialize();
 
         } catch (error) {
-            console.error('Error during scrape and refresh:', error);
             alert('스크래퍼 실행 또는 데이터 로딩 중 오류가 발생했습니다.');
         } finally {
-            // Step 3: Restore button state
             refreshBtn.disabled = false;
             refreshBtn.textContent = originalButtonText;
         }
@@ -189,7 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     feedContainer.addEventListener('click', (e) => {
         if (e.target.classList.contains('add-to-calendar-btn')) {
-            // Stop the link from being triggered when the button is clicked
             e.preventDefault(); 
             e.stopPropagation();
             const announcementId = Number(e.target.dataset.id);
