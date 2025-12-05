@@ -9,7 +9,8 @@ $user_file = 'user.json';
 $notices_file = 'notices.json';
 $new_notices_file = 'new_notices.json';
 
-function write_log($message) {
+function write_log($message)
+{
     global $log_file;
     $timestamp = date('Y-m-d H:i:s');
     file_put_contents($log_file, "[$timestamp] $message\n", FILE_APPEND);
@@ -31,16 +32,19 @@ try {
     if (file_exists($notices_file)) {
         $old_notices_json = file_get_contents($notices_file);
         $old_notices = json_decode($old_notices_json, true);
-        if (!is_array($old_notices)) $old_notices = [];
+        if (!is_array($old_notices))
+            $old_notices = [];
     }
     $existing_notices_set = [];
     foreach ($old_notices as $notice) {
         $existing_notices_set[$notice['title'] . '::' . $notice['site']] = true;
     }
 
-    if (!file_exists($user_file)) throw new Exception("user.json 파일을 찾을 수 없습니다.");
+    if (!file_exists($user_file))
+        throw new Exception("user.json 파일을 찾을 수 없습니다.");
     $users_data = json_decode(file_get_contents($user_file), true);
-    if (json_last_error() !== JSON_ERROR_NONE) throw new Exception('user.json 파일 디코딩 오류: ' . json_last_error_msg());
+    if (json_last_error() !== JSON_ERROR_NONE)
+        throw new Exception('user.json 파일 디코딩 오류: ' . json_last_error_msg());
 
     $sites_to_scrape = [];
     foreach ($users_data as $user) {
@@ -52,7 +56,8 @@ try {
             }
         }
     }
-    if (empty($sites_to_scrape)) throw new Exception("No sites are registered by any user.");
+    if (empty($sites_to_scrape))
+        throw new Exception("No sites are registered by any user.");
 
     $all_notices = [];
     $newly_added_notices = [];
@@ -91,7 +96,8 @@ try {
 
         foreach ($rows as $row) {
             $first_td = $xpath->query('.//td[1]', $row)->item(0);
-            if ($first_td && !is_numeric(trim($first_td->textContent))) continue;
+            if ($first_td && !is_numeric(trim($first_td->textContent)))
+                continue;
 
             $title_node = $xpath->query($config['title_selector'], $row)->item(0);
             $date_node = $xpath->query($config['date_selector'], $row)->item(0);
@@ -112,7 +118,7 @@ try {
                         $base_url = $parsed_url['scheme'] . '://' . $parsed_url['host'];
                         $notice_url = $base_url . $raw_url;
                     } else {
-                         $notice_url = $page_base_path . $raw_url;
+                        $notice_url = $page_base_path . $raw_url;
                     }
                 }
 
@@ -124,7 +130,7 @@ try {
                         'site' => $site_name,
                         'notice_url' => $notice_url
                     ];
-                    
+
                     $all_notices[] = $notice_data;
 
                     if (!isset($existing_notices_set[$current_notice_key])) {
@@ -157,7 +163,7 @@ try {
     }
 
     if (file_put_contents($new_notices_file, json_encode($newly_added_notices, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) !== false) {
-        write_log("Successfully created new_notices.json with ". count($newly_added_notices) . " new notices.");
+        write_log("Successfully created new_notices.json with " . count($newly_added_notices) . " new notices.");
     } else {
         throw new Exception('Failed to write to new_notices.json.');
     }
