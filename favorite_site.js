@@ -103,7 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
             renderPagination(allAnnouncementsForSite.length);
 
         } catch (error) {
-            console.error("Error:", error);
             siteTitleEl.textContent = '오류';
             announcementsListEl.innerHTML = `<p class="text-center text-danger">${error.message}</p>`;
         }
