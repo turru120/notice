@@ -2,12 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const siteTitleEl = document.getElementById('site-title');
     const announcementsListEl = document.getElementById('announcements-list');
     
-    // Create a container for pagination dynamically
     let paginationContainer = document.getElementById('pagination-container');
     if (!paginationContainer) {
         paginationContainer = document.createElement('div');
         paginationContainer.id = 'pagination-container';
-        // Insert it after the announcements list
         announcementsListEl.parentNode.insertBefore(paginationContainer, announcementsListEl.nextSibling);
     }
 
@@ -45,7 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalPages = Math.ceil(totalItems / itemsPerPage);
         if (totalPages <= 1) return;
 
-        const maxPageNumbers = 10;
+        // [보완] 페이지네이션 바에 페이지 번호 수 표시되는 방식 변경 - 사용자 편의성 향상
+        // 페이지네이션 바에 한 번에 표시될 최대 페이지 번호 수 10-> 5로 줄이고, 현재 페이지를 중심으로 총 5개 표시
+        const maxPageNumbers = 5;
         let startPage = Math.max(1, currentPage - Math.floor(maxPageNumbers / 2));
         let endPage = Math.min(totalPages, startPage + maxPageNumbers - 1);
 
