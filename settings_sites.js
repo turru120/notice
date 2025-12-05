@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const user = await response.json();
             const serverSites = user.registered_sites || [];
-            
+
             sites = serverSites.map((site, index) => {
                 return {
                     id: site.id || Date.now() + index,
@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function saveSites() {
+        // 현재 사이트 목록 전체를 서버에 저장
         const userId = localStorage.getItem('current_user_id');
         if (!userId) {
             alert('로그인 정보가 없습니다. 다시 로그인해주세요.');
@@ -194,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         siteModal.show();
     }
 
+    // 저장 버튼을 눌렀을 때 
     async function handleSave() {
         const id = siteIdInput.value ? Number(siteIdInput.value) : null;
         const name = siteNameInput.value.trim();

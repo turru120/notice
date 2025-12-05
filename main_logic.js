@@ -52,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const storedCategories = localStorage.getItem(getCategoriesKey());
         const categories = storedCategories ? JSON.parse(storedCategories) : ['수업', '장학', '행사', '기타'];
 
-        // For search filter
         searchCategorySelect.innerHTML = '<option value="">전체</option>';
         categories.forEach(cat => {
             const option = document.createElement('option');
@@ -61,7 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
             searchCategorySelect.appendChild(option);
         });
 
-        // For modal dropdowns
         const dropdowns = [scheduleCategoryInput, detailsEditCategorySelect];
         dropdowns.forEach(dropdown => {
             dropdown.innerHTML = '<option value="" disabled selected>분류 선택</option>';
@@ -92,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderCalendar(date, schedulesToRender, highlightedSchedules = []) {
+        // 주어진 날짜에 해당하는 달력을 그리고 일정을 렌더링
         const year = date.getFullYear();
         const month = date.getMonth();
         yearInput.value = year;
@@ -150,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderScheduleList(schedulesToRender, highlightedSchedules = []) {
+        // 주어진 일정 목록을 테이블 형태로 렌더링
         let listHtml = `<table class="table table-hover" style="font-size: 0.9rem;"><thead class="blue-header"><tr><th>날짜</th><th>분류</th><th>제목</th><th>중요도</th></tr></thead><tbody>`;
         if (schedulesToRender.length === 0) {
             listHtml += '<tr><td colspan="4" class="text-center text-muted">해당하는 공지가 없습니다.</td></tr>';
@@ -176,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleSearch() {
+        // 검색 조건에 따라 일정을 필터링하고 화면을 다시 렌더링
         const category = searchCategorySelect.value;
         const priority = searchPrioritySelect.value;
         const keyword = searchKeywordInput.value.toLowerCase();
@@ -333,6 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function initialize() {
+        // 저장된 모든 일정을 불러오고 화면 구성
         allSchedules = await fetchAnnouncements();
         populateCategoryDropdowns();
 

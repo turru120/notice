@@ -227,12 +227,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+     // '알림 받을 사이트 목록'의 편집/완료 버튼을 눌렀을 때 실행
     async function toggleSitesEditMode() {
         if (isSitesEditMode) {
             isSitesEditMode = false;
             editSitesBtn.textContent = '저장 중';
             editSitesBtn.disabled = true;
 
+            // 체크된 사이트들의 ID 목록을 가져와 서버에 전송하여 저장
             const selectedIds = Array.from(document.querySelectorAll('.site-checkbox:checked')).map(cb => Number(cb.value));
             const userId = localStorage.getItem('current_user_id');
 

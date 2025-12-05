@@ -16,6 +16,42 @@ function write_log($message)
     file_put_contents($log_file, "[$timestamp] $message\n", FILE_APPEND);
 }
 
+function resolve_url($page_url, $raw_url)
+{
+    if (filter_var($raw_url, FILTER_VALIDATE_URL)) {
+        return $raw_url;
+    } else {
+        // 상대경로 URL 변환 로직
+        $parsed_url = parse_url($page_url);
+        $scheme = $parsed_url['scheme'];
+        $host = $parsed_url['host'];
+        $path = isset($parsed_url['path']) ? $parsed_url['path'] : '';
+
+        if ($raw_url[0] === '/') {
+            return "$scheme://$host$raw_url";
+        } else {
+            $dir = dirname($path);
+            if ($dir === '.' || $dir === '/') {
+                $dir = '';
+            }
+            else if (substr($page_url, -1) !== '/') {
+                 $dir = substr($dir, 0, strrpos($dir, '/') + 1);
+            }
+
+            if (substr($raw_url, 0, 2) === './') {
+                $raw_url = substr($raw_url, 2);
+            }
+            
+            while (substr($raw_url, 0, 3) === '../') {
+                $dir = substr($dir, 0, strrpos(rtrim($dir, '/'), '/') + 1);
+                $raw_url = substr($raw_url, 3);
+            }
+
+            return "$scheme://$host$dir$raw_url";
+        }
+    }
+}
+
 write_log("======== Scraper-Job-Start ========");
 
 try {
@@ -62,6 +98,7 @@ try {
     $all_notices = [];
     $newly_added_notices = [];
 
+// 등록된 모든 사이트를 순회하며 공지사항을 스크랩
     foreach ($sites_to_scrape as $site) {
         $site_name = $site['site_name'];
         $url = $site['site_url'];
@@ -73,6 +110,7 @@ try {
         }
         $config = $scraper_configs[$site_name];
 
+        // 사이트의 HTML 내용을 가져옴
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -88,6 +126,7 @@ try {
         }
         curl_close($ch);
 
+        // 설정된 선택자로 공지사항 목록을 찾음
         $dom = new DOMDocument();
         @$dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', $config['encoding']), LIBXML_NOWARNING | LIBXML_NOERROR);
         $xpath = new DOMXPath($dom);
@@ -107,20 +146,8 @@ try {
                 $date = date('Y-m-d', strtotime(trim($date_node->textContent)));
                 $raw_url = trim($title_node->getAttribute('href'));
 
-                if (filter_var($raw_url, FILTER_VALIDATE_URL)) {
-                    $notice_url = $raw_url;
-                } else {
-                    $page_base_path = explode('?', $url)[0];
-                    if (strpos($raw_url, './') === 0) {
-                        $notice_url = $page_base_path . substr($raw_url, 2);
-                    } else if ($raw_url[0] === '/') {
-                        $parsed_url = parse_url($url);
-                        $base_url = $parsed_url['scheme'] . '://' . $parsed_url['host'];
-                        $notice_url = $base_url . $raw_url;
-                    } else {
-                        $notice_url = $page_base_path . $raw_url;
-                    }
-                }
+                // 절대/상대 경로를 판단해 완전한 공지사항 URL을 생성
+                $notice_url = resolve_url($url, $raw_url);
 
                 if (!empty($title) && $date !== '1970-01-01') {
                     $current_notice_key = $title . '::' . $site_name;
@@ -133,6 +160,7 @@ try {
 
                     $all_notices[] = $notice_data;
 
+                    // 기존에 없던 새로운 공지사항인지 확인
                     if (!isset($existing_notices_set[$current_notice_key])) {
                         $newly_added_notices[] = $notice_data;
                     }

@@ -52,6 +52,7 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     exit;
 }
 
+// 모든 사용자를 순회하며 알림을 보낼지 결정
 foreach ($users as $user) {
     if (empty($user['notification']) || empty($user['email']) || empty($user['registered_sites'])) {
         continue;
@@ -59,6 +60,7 @@ foreach ($users as $user) {
 
     write_log("Checking notifications for user: " . $user['id']);
 
+    // 사용자가 알림을 받기로 설정한 사이트 목록 생성
     $notification_sites = [];
     if (!empty($user['registered_sites'])) {
         foreach ($user['registered_sites'] as $site) {
@@ -73,6 +75,7 @@ foreach ($users as $user) {
         continue;
     }
 
+    // 새로운 공지사항 중 사용자가 알림을 설정한 사이트의 공지사항만 필터링
     $notices_for_user = [];
     foreach ($new_notices as $notice) {
         if (in_array($notice['site'], $notification_sites)) {
@@ -80,11 +83,13 @@ foreach ($users as $user) {
         }
     }
 
-    //[보완] 이메일 멘트 보완 - 사용자 편의성 안내
+    //[보완] 이메일 멘트 보완 - 사용자 편의성
+    // 이메일 발송
     if (!empty($notices_for_user)) {
         $to = $user['email'];
         $subject = "[공지사항] " . count($notices_for_user) . "개의 새로운 공지사항이 있습니다.";
 
+        // 이메일 본문 내용
         $message = "안녕하세요, " . $user['name'] . "님.\n\n";
         $message .= "즐겨찾기한 사이트에 새로운 공지사항이 등록되었습니다.\n\n";
 
