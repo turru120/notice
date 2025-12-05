@@ -1,5 +1,4 @@
 <?php
-
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -18,6 +17,7 @@ try {
         throw new Exception('Invalid JSON received: ' . json_last_error_msg());
     }
 
+    // 필수 데이터 존재 여부 확인
     if (!isset($input_data['userId']) || !isset($input_data['sites'])) {
         throw new Exception('User ID or sites data not provided.');
     }
@@ -35,10 +35,11 @@ try {
     $user_found = false;
     $name_changes = [];
 
+    // 현재 사용자 정보 업데이트
     foreach ($users_data as &$user) {
         if ($user['id'] === $current_user_id) {
             $user_found = true;
-            
+
             $old_sites = isset($user['registered_sites']) ? $user['registered_sites'] : [];
             $old_sites_map = [];
             foreach ($old_sites as $old_site) {
@@ -65,10 +66,12 @@ try {
         throw new Exception('User not found.');
     }
 
+    // 변경된 사용자 데이터를 JSON 파일에 저장
     if (file_put_contents($user_file, json_encode($users_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) === false) {
         throw new Exception('Failed to write to user data file.');
     }
 
+    // 사이트 이름 변경 & notices.json 파일 존재 -> 공지사항 업데이트
     if (!empty($name_changes) && file_exists($notices_file)) {
         $notices_data = json_decode(file_get_contents($notices_file), true);
         if ($notices_data) {
@@ -87,6 +90,7 @@ try {
         }
     }
 
+    // 스크래퍼 설정 파일 업데이트
     $scraper_configs = [];
     if (file_exists($scraper_config_file)) {
         $scraper_configs = json_decode(file_get_contents($scraper_config_file), true);
@@ -95,6 +99,7 @@ try {
         }
     }
 
+    // 새 사이트 정보로 스크래퍼 설정 업데이트
     foreach ($new_sites as $site) {
         if (!empty($site['site_name']) && !empty($site['notice_list_selector'])) {
             $scraper_configs[$site['site_name']] = [
@@ -106,12 +111,13 @@ try {
         }
     }
 
+    // 업데이트된 스크래퍼 설정을 파일에 저장
     if (file_put_contents($scraper_config_file, json_encode($scraper_configs, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) === false) {
         error_log('Failed to update scraper_config.json.');
     } else {
         $php_executable = 'C:\\php8\\php.exe';
         $scraper_script_path = __DIR__ . '\\scraper.php';
-        
+
         if (file_exists($scraper_script_path)) {
             $command = escapeshellcmd($php_executable) . ' ' . escapeshellarg($scraper_script_path);
             pclose(popen("start /B " . $command, "r"));
