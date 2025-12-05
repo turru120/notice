@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 사용자 데이터를 서버에서 불러와 화면에 표시
     async function loadUserData() {
+        const hasMypageUserNameDisplay = !!mypageUserName;
         try {
             const userId = localStorage.getItem('current_user_id');
             if (!userId) {
@@ -38,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const user = await response.json();
 
-            if(mypageUserName) {
+            if (hasMypageUserNameDisplay) {
                 mypageUserName.innerHTML = `이름 : ${user.name || '사용자'}`;
             }
 
@@ -50,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
             allSites = user.registered_sites || [];
 
         } catch (error) {
-            if(mypageUserName) {
+            if (hasMypageUserNameDisplay) {
                 mypageUserName.innerHTML = '사용자 정보 로딩 실패';
             }
         }
@@ -289,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function init() {
         await loadUserData();
         loadCategories();
-        
+
         renderCategories();
         renderEmailSection();
         renderSitesList();
