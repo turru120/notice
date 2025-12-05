@@ -19,14 +19,17 @@ $output = [];
 $status = 'success';
 $message = 'Scraper and Notifier executed.';
 
+// 스크래퍼 스크립트 실행
 $scraper_command = escapeshellcmd($php_executable) . ' ' . escapeshellarg($scraper_script_path);
 $scraper_output = shell_exec($scraper_command);
 $output['scraper'] = $scraper_output;
 
+// 메알 발송 스크립트 실행
 $notifier_command = escapeshellcmd($php_executable) . ' ' . escapeshellarg($notifier_script_path);
 $notifier_output = shell_exec($notifier_command);
 $output['notifier'] = $notifier_output;
 
+// 최종 실행 결과 JSON 형식으로 출력
 echo json_encode([
     'status' => $status,
     'message' => $message,
