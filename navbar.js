@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function renderNavbar() {
         const userNameDisplay = document.getElementById('user-name-display');
         if (userNameDisplay) {
-           const currentUser = localStorage.getItem('current_user_name');
+            const currentUser = localStorage.getItem('current_user_name');
             userNameDisplay.textContent = currentUser || '사용자';
         }
 
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const user = await response.json();
             const sites = user.registered_sites || [];
-            
+
             const favoriteSites = sites.filter(site => site.isFavorite);
 
             favoriteSites.forEach(site => {

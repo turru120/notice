@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const siteTitleEl = document.getElementById('site-title');
     const announcementsListEl = document.getElementById('announcements-list');
-    
+
     let paginationContainer = document.getElementById('pagination-container');
     if (!paginationContainer) {
         paginationContainer = document.createElement('div');
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const siteId = Number(urlParams.get('id'));
             if (!siteId) throw new Error('URL에 site ID가 지정되지 않았습니다.');
-            
+
             const userId = localStorage.getItem('current_user_id');
             if (!userId) throw new Error('로그인 정보가 없습니다.');
 
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentSite = (user.registered_sites || []).find(site => site.id === siteId);
 
             if (!currentSite) throw new Error('주어진 ID에 해당하는 사이트를 찾을 수 없습니다.');
-            
+
             siteTitleEl.textContent = `선택한 홈페이지 : ${currentSite.site_name}`;
 
             const noticesResponse = await fetch('notices.json?t=' + new Date().getTime());
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const allNotices = await noticesResponse.json();
 
             allAnnouncementsForSite = allNotices.filter(notice => notice.site === currentSite.site_name);
-            
+
             renderFeed(currentPage);
             renderPagination(allAnnouncementsForSite.length);
 

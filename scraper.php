@@ -1,28 +1,23 @@
 <?php
-// 목표: user.json에 등록된 여러 사이트에서 공지사항을 스크레이핑하여 notices.json 파일로 저장하며, 실행 과정을 scraper.log 파일에 기록합니다.
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// --- 설정 ---
 $log_file = 'scraper.log';
 $user_file = 'user.json';
 $notices_file = 'notices.json';
 $new_notices_file = 'new_notices.json';
 
-// --- 로그 함수 ---
 function write_log($message) {
     global $log_file;
     $timestamp = date('Y-m-d H:i:s');
     file_put_contents($log_file, "[$timestamp] $message\n", FILE_APPEND);
 }
 
-// --- 스크립트 시작 ---
 write_log("======== Scraper-Job-Start ========");
 
 try {
-    // --- 스크레이퍼 설정 로드 ---
     $scraper_config_file = 'scraper_config.json';
     if (!file_exists($scraper_config_file)) {
         throw new Exception("Scraper config file not found: {$scraper_config_file}");
@@ -32,7 +27,6 @@ try {
         throw new Exception('Error decoding scraper_config.json: ' . json_last_error_msg());
     }
 
-    // --- 기존 공지사항 로드 ---
     $old_notices = [];
     if (file_exists($notices_file)) {
         $old_notices_json = file_get_contents($notices_file);
@@ -44,12 +38,10 @@ try {
         $existing_notices_set[$notice['title'] . '::' . $notice['site']] = true;
     }
 
-    // --- 사용자 데이터 로드 ---
     if (!file_exists($user_file)) throw new Exception("user.json 파일을 찾을 수 없습니다.");
     $users_data = json_decode(file_get_contents($user_file), true);
     if (json_last_error() !== JSON_ERROR_NONE) throw new Exception('user.json 파일 디코딩 오류: ' . json_last_error_msg());
 
-    // --- 모든 사용자의 모든 사이트 목록 취합 ---
     $sites_to_scrape = [];
     foreach ($users_data as $user) {
         if (isset($user['registered_sites']) && is_array($user['registered_sites'])) {
@@ -62,7 +54,6 @@ try {
     }
     if (empty($sites_to_scrape)) throw new Exception("No sites are registered by any user.");
 
-    // --- 스크레이핑 실행 ---
     $all_notices = [];
     $newly_added_notices = [];
 
@@ -110,11 +101,9 @@ try {
                 $date = date('Y-m-d', strtotime(trim($date_node->textContent)));
                 $raw_url = trim($title_node->getAttribute('href'));
 
-                // Build absolute URL
                 if (filter_var($raw_url, FILTER_VALIDATE_URL)) {
                     $notice_url = $raw_url;
                 } else {
-                    // Handle relative URLs
                     $page_base_path = explode('?', $url)[0];
                     if (strpos($raw_url, './') === 0) {
                         $notice_url = $page_base_path . substr($raw_url, 2);
@@ -146,11 +135,9 @@ try {
         }
     }
 
-    // --- 결과 처리 ---
     write_log("Total notices scraped: " . count($all_notices));
     write_log("New notices found: " . count($newly_added_notices));
 
-    // 스크레이핑된 공지가 있을 경우에만 파일에 저장
     if (count($all_notices) > 0) {
         usort($all_notices, fn($a, $b) => strtotime($b['date']) - strtotime($a['date']));
 
@@ -169,7 +156,6 @@ try {
         write_log("No notices were scraped. 'notices.json' will not be updated to prevent data loss.");
     }
 
-    // 새 공지사항 파일은 항상 최신 상태로 업데이트
     if (file_put_contents($new_notices_file, json_encode($newly_added_notices, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) !== false) {
         write_log("Successfully created new_notices.json with ". count($newly_added_notices) . " new notices.");
     } else {

@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`공지사항 목록을 불러오는데 실패했습니다: ${noticesResponse.status}`);
             }
             const noticeData = await noticesResponse.json();
-            
+
             const filteredData = noticeData.filter(item => subscribedSiteNames.has(item.site));
 
             const processedData = filteredData.map(item => ({
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // [보완] 페이지네이션 바에 페이지 번호 수 표시되는 방식 변경 - 사용자 편의성 향상
         // 페이지네이션 바에 한 번에 표시될 최대 페이지 번호 수 10-> 5로 줄이고, 현재 페이지를 중심으로 총 5개 표시
-        const maxPageNumbers = 5; 
+        const maxPageNumbers = 5;
         let startPage = Math.max(1, currentPage - Math.floor(maxPageNumbers / 2));
         let endPage = Math.min(totalPages, startPage + maxPageNumbers - 1);
 
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const calendarKey = getCalendarKey();
         const calendarSchedules = JSON.parse(localStorage.getItem(calendarKey)) || [];
-        
+
         if (calendarSchedules.some(s => s.id === announcementId)) {
             alert('이미 달력에 추가된 항목입니다.');
             return;
@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function initialize() {
-        currentPage = 1; 
+        currentPage = 1;
         const announcements = await fetchAllAnnouncements();
         renderFeed(announcements, currentPage);
         renderPagination(announcements.length);
@@ -164,9 +164,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 throw new Error(`Scraper failed with status: ${response.status}`);
             }
-            
+
             const result = await response.json();
-            
+
             await initialize();
 
         } catch (error) {
@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     feedContainer.addEventListener('click', (e) => {
         if (e.target.classList.contains('add-to-calendar-btn')) {
-            e.preventDefault(); 
+            e.preventDefault();
             e.stopPropagation();
             const announcementId = Number(e.target.dataset.id);
             addToCalendar(announcementId);

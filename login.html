@@ -33,7 +33,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.getElementById('login-form').addEventListener('submit', async function(e) {
+        document.getElementById('login-form').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const username = document.getElementById('username').value;
@@ -49,7 +49,6 @@
                 const foundUser = users.find(user => user.id === username && user.password === password);
 
                 if (foundUser) {
-                    // Store both user ID and name in localStorage for other pages to use
                     localStorage.setItem('current_user_id', foundUser.id);
                     localStorage.setItem('current_user_name', foundUser.name);
                     window.location.href = 'main.html';

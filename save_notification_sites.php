@@ -1,6 +1,4 @@
 <?php
-// save_notification_sites.php
-
 header('Content-Type: application/json');
 
 $user_file = 'user.json';
@@ -15,7 +13,7 @@ try {
     if (!isset($request_data['userId']) || !isset($request_data['siteIds'])) {
         throw new Exception('User ID or Site IDs not provided.');
     }
-    
+
     $current_user_id = $request_data['userId'];
     $selected_site_ids = $request_data['siteIds'];
 
@@ -36,9 +34,7 @@ try {
         if ($user['id'] === $current_user_id) {
             $user_found = true;
             if (isset($user['registered_sites']) && is_array($user['registered_sites'])) {
-                // 사용자의 모든 등록된 사이트를 순회하며 알림 수신 여부(receiveNotification)를 업데이트합니다.
                 foreach ($user['registered_sites'] as &$site) {
-                    // siteIds 배열에 현재 사이트의 ID가 포함되어 있는지 확인하여 true 또는 false를 설정합니다.
                     $site['receiveNotification'] = in_array($site['id'], $selected_site_ids);
                 }
             }

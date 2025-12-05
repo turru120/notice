@@ -1,5 +1,4 @@
 <?php
-// save_sites.php (Corrected Version)
 
 header('Content-Type: application/json');
 
@@ -14,7 +13,6 @@ $notices_file = 'notices.json';
 $scraper_config_file = 'scraper_config.json';
 
 try {
-    // --- Input Data Processing ---
     $input_data = json_decode(file_get_contents('php://input'), true);
     if (json_last_error() !== JSON_ERROR_NONE) {
         throw new Exception('Invalid JSON received: ' . json_last_error_msg());
@@ -26,7 +24,6 @@ try {
     $current_user_id = $input_data['userId'];
     $new_sites = $input_data['sites'];
 
-    // --- user.json Processing ---
     if (!file_exists($user_file)) {
         throw new Exception('User data file not found.');
     }
@@ -42,7 +39,6 @@ try {
         if ($user['id'] === $current_user_id) {
             $user_found = true;
             
-            // Site name change detection logic (remains the same)
             $old_sites = isset($user['registered_sites']) ? $user['registered_sites'] : [];
             $old_sites_map = [];
             foreach ($old_sites as $old_site) {
@@ -60,7 +56,6 @@ try {
                 }
             }
 
-            // Update user's registered sites
             $user['registered_sites'] = $new_sites;
             break;
         }
@@ -70,12 +65,10 @@ try {
         throw new Exception('User not found.');
     }
 
-    // Save user.json
     if (file_put_contents($user_file, json_encode($users_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) === false) {
         throw new Exception('Failed to write to user data file.');
     }
 
-    // --- notices.json Update Logic (remains the same) ---
     if (!empty($name_changes) && file_exists($notices_file)) {
         $notices_data = json_decode(file_get_contents($notices_file), true);
         if ($notices_data) {
@@ -94,21 +87,18 @@ try {
         }
     }
 
-    // --- [CORRECTED] scraper_config.json Update Logic ---
     $scraper_configs = [];
     if (file_exists($scraper_config_file)) {
         $scraper_configs = json_decode(file_get_contents($scraper_config_file), true);
         if (!is_array($scraper_configs)) {
-            $scraper_configs = []; // In case the file is empty or corrupt
+            $scraper_configs = [];
         }
     }
 
-    // Add or update the config with the user's newly saved sites
     foreach ($new_sites as $site) {
         if (!empty($site['site_name']) && !empty($site['notice_list_selector'])) {
             $scraper_configs[$site['site_name']] = [
-                // Add any other scraper-specific fields here if needed, like encoding
-                'encoding' => 'UTF-8', // Assuming default, can be a field later
+                'encoding' => 'UTF-8',
                 'list_selector' => $site['notice_list_selector'],
                 'title_selector' => $site['notice_title_selector'],
                 'date_selector' => $site['notice_date_selector']
@@ -116,11 +106,9 @@ try {
         }
     }
 
-    // Save the updated map back to scraper_config.json
     if (file_put_contents($scraper_config_file, json_encode($scraper_configs, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) === false) {
         error_log('Failed to update scraper_config.json.');
     } else {
-        // --- [CORRECTED] Trigger Scraper ---
         $php_executable = 'C:\\php8\\php.exe';
         $scraper_script_path = __DIR__ . '\\scraper.php';
         
@@ -132,7 +120,6 @@ try {
         }
     }
 
-    // Success response
     echo json_encode(['success' => true, 'message' => 'Sites saved and scraper started.']);
 
 } catch (Exception $e) {

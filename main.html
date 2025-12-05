@@ -23,20 +23,21 @@
                 <span class="me-3"><strong id="user-name-display" class="small">사용자님</strong></span>
                 <a href="logout.php" class="btn btn-outline-secondary btn-sm">로그아웃</a>
             </div>
-        </header>    <nav>
-        <ul id="navbar-links">
-            <li class="nav-item dropdown" id="settings-dropdown-li">
-                <a class="nav-link dropdown-toggle nav-settings-icon" href="#" id="settingsDropdown" role="button"
-                    data-bs-toggle="dropdown" aria-expanded="false">
-                    ⚙️
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="settingsDropdown">
-                    <li><a class="dropdown-item" href="settings_sites.html">사이트 관리</a></li>
-                    <li><a class="dropdown-item" href="settings_mypage.html">마이페이지</a></li>
-                </ul>
-            </li>
-        </ul>
-    </nav>
+        </header>
+        <nav>
+            <ul id="navbar-links">
+                <li class="nav-item dropdown" id="settings-dropdown-li">
+                    <a class="nav-link dropdown-toggle nav-settings-icon" href="#" id="settingsDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        ⚙️
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="settingsDropdown">
+                        <li><a class="dropdown-item" href="settings_sites.html">사이트 관리</a></li>
+                        <li><a class="dropdown-item" href="settings_mypage.html">마이페이지</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
 
         <main class="row gy-4 my-4">
             <div class="col-12 col-lg-7">
@@ -56,7 +57,8 @@
                     <h5>공지 검색</h5>
                     <div class="search-box p-3 border rounded">
                         <div class="row mb-2 align-items-center">
-                            <label for="search-category" class="col-sm-3 col-form-label" style="font-size: 0.9rem;">분류</label>
+                            <label for="search-category" class="col-sm-3 col-form-label"
+                                style="font-size: 0.9rem;">분류</label>
                             <div class="col-sm-9">
                                 <select id="search-category" class="form-select form-select-sm">
                                     <option value="">전체</option>
@@ -64,7 +66,8 @@
                             </div>
                         </div>
                         <div class="row mb-2 align-items-center">
-                            <label for="search-priority" class="col-sm-3 col-form-label" style="font-size: 0.9rem;">중요도</label>
+                            <label for="search-priority" class="col-sm-3 col-form-label"
+                                style="font-size: 0.9rem;">중요도</label>
                             <div class="col-sm-9">
                                 <select id="search-priority" class="form-select form-select-sm">
                                     <option value="">전체</option>
@@ -75,9 +78,11 @@
                             </div>
                         </div>
                         <div class="row mb-3 align-items-center">
-                            <label for="search-keyword" class="col-sm-3 col-form-label" style="font-size: 0.9rem;">키워드</label>
+                            <label for="search-keyword" class="col-sm-3 col-form-label"
+                                style="font-size: 0.9rem;">키워드</label>
                             <div class="col-sm-9">
-                                <input type="text" id="search-keyword" class="form-control form-control-sm" placeholder="제목 또는 내용">
+                                <input type="text" id="search-keyword" class="form-control form-control-sm"
+                                    placeholder="제목 또는 내용">
                             </div>
                         </div>
                         <button id="search-btn" class="btn btn-primary w-100">검색</button>
@@ -133,7 +138,8 @@
                             </select>
                         </div>
                         <div class="d-flex justify-content-end gap-2 mt-4">
-                            <button type="button" id="cancel-modal-btn" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                            <button type="button" id="cancel-modal-btn" class="btn btn-secondary"
+                                data-bs-dismiss="modal">취소</button>
                             <button type="submit" class="btn btn-primary">저장</button>
                         </div>
                     </form>
@@ -184,7 +190,8 @@
                 <div class="modal-footer justify-content-between">
                     <button type="button" id="delete-schedule-btn" class="btn btn-danger">삭제</button>
                     <div>
-                        <button type="button" id="cancel-edit-btn" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        <button type="button" id="cancel-edit-btn" class="btn btn-secondary"
+                            data-bs-dismiss="modal">취소</button>
                         <button type="button" id="update-schedule-btn" class="btn btn-primary">수정 완료</button>
                     </div>
                 </div>
