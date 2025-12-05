@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const endIndex = startIndex + itemsPerPage;
         const paginatedAnnouncements = allAnnouncementsForSite.slice(startIndex, endIndex);
 
+        // 공지사항 카드를 생성해 목록에 추가
         const feedHtml = paginatedAnnouncements.map(ann => `
             <div class="card mb-3">
                 <div class="card-body">
@@ -38,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         announcementsListEl.innerHTML = feedHtml;
     }
 
+    // 페이지네이션 컨트롤을 UI에 렌더링
     function renderPagination(totalItems) {
         paginationContainer.innerHTML = '';
         const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -75,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         paginationContainer.innerHTML = paginationHtml;
     }
 
+    // URL에서 site ID를 가져와 해당 사이트의 공지사항을 로드 및 렌더링
     async function initialize() {
         try {
             const urlParams = new URLSearchParams(window.location.search);
@@ -86,9 +89,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const sitesResponse = await fetch(`get_sites.php?user_id=${userId}&t=${new Date().getTime()}`);
             if (!sitesResponse.ok) throw new Error('사이트 정보를 불러오는 데 실패했습니다.');
+
             const user = await sitesResponse.json();
             const currentSite = (user.registered_sites || []).find(site => site.id === siteId);
-
             if (!currentSite) throw new Error('주어진 ID에 해당하는 사이트를 찾을 수 없습니다.');
 
             siteTitleEl.textContent = `선택한 홈페이지 : ${currentSite.site_name}`;
@@ -97,6 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!noticesResponse.ok) throw new Error('공지사항 데이터를 불러오는 데 실패했습니다.');
             const allNotices = await noticesResponse.json();
 
+            // 현재 사이트에 해당하는 공지사항만 필터링
             allAnnouncementsForSite = allNotices.filter(notice => notice.site === currentSite.site_name);
 
             renderFeed(currentPage);
