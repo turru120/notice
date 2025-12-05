@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // 사이트 추가/수정 모달 관련 요소
     const siteModalEl = document.getElementById('site-modal');
     const siteModal = new bootstrap.Modal(siteModalEl);
     const siteForm = document.getElementById('site-form');
@@ -9,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const noticeTitleSelectorInput = document.getElementById('site-notice-title-selector');
     const noticeDateSelectorInput = document.getElementById('site-notice-date-selector');
 
+    // 버튼 및 테이블 관련 요소
     const saveSiteBtn = document.getElementById('save-site-btn');
     const addSiteBtn = document.getElementById('add-site-btn');
     const editModeBtn = document.getElementById('edit-mode-btn');
@@ -21,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
         '#007BFF', '#28A745', '#DC3545', '#FFC107', '#17A2B8', '#6610f2', '#fd7e14', '#e83e8c', '#20c997'
     ];
 
+    // 서버에서 사이트 목록을 불러오고 테이블 렌더링
     async function loadSites() {
         try {
             const userId = localStorage.getItem('current_user_id');
@@ -33,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const user = await response.json();
             const serverSites = user.registered_sites || [];
 
+            // 불러온 사이트 데이터를 내부 형식에 맞게 변환
             sites = serverSites.map((site, index) => {
                 return {
                     id: site.id || Date.now() + index,
@@ -51,8 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 현재 사이트 목록을 서버에 저장
     async function saveSites() {
-        // 현재 사이트 목록 전체를 서버에 저장
         const userId = localStorage.getItem('current_user_id');
         if (!userId) {
             alert('로그인 정보가 없습니다. 다시 로그인해주세요.');
@@ -119,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 현재 사이트 목록을 테이블 형태로 렌더링
     function renderTable() {
         tableBody.innerHTML = '';
         sites.forEach(site => {
@@ -156,6 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
         actionsHeader.style.display = isEditMode ? 'table-cell' : 'none';
     }
 
+    // 편집 모드를 토글하고 변경 사항 저장
     async function toggleEditMode() {
         if (isEditMode) {
             const favoriteCheckboxes = document.querySelectorAll('.favorite-checkbox');
@@ -175,9 +181,11 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTable();
     }
 
+    // 사이트 추가/수정 모달을 열고 폼 데이터 설정
     function openModal(siteId = null) {
         siteForm.reset();
         if (siteId) {
+            // 사이트 수정 모드
             const site = sites.find(s => s.id === siteId);
             if (site) {
                 document.getElementById('site-modal-label').textContent = '사이트 수정';
@@ -189,13 +197,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 noticeDateSelectorInput.value = site.notice_date_selector || '';
             }
         } else {
+            // 새 사이트 추가 모드
             document.getElementById('site-modal-label').textContent = '사이트 추가';
             siteIdInput.value = '';
         }
         siteModal.show();
     }
 
-    // 저장 버튼을 눌렀을 때 
+    // 사이트 추가 또는 수정 요청을 처리하고 서버에 저장
     async function handleSave() {
         const id = siteIdInput.value ? Number(siteIdInput.value) : null;
         const name = siteNameInput.value.trim();
@@ -210,6 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (id) {
+            // 기존 사이트 수정
             const site = sites.find(s => s.id === id);
             if (site) {
                 site.name = name;
@@ -219,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 site.notice_date_selector = dateSelector;
             }
         } else {
+            // 새 사이트 추가
             // [추가] 새 사이트 추가 시 기본 색 할당 - 사용자 편의성 향상
             const newColor = defaultColors[sites.length % defaultColors.length];
             sites.push({
