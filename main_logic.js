@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return `managed_categories_${userId || 'guest'}`;
     }
 
+    // DOM 요소 참조 (주요 UI 컴포넌트)
     const calendarContainer = document.getElementById('calendar-container');
     const scheduleListContainer = document.getElementById('schedule-list-container');
     const searchCategorySelect = document.getElementById('search-category');
@@ -22,6 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const yearInput = document.getElementById('year-input');
     const monthInput = document.getElementById('month-input');
     const renderBtn = document.getElementById('render-calendar-btn');
+
+    // 일정 추가 모달 관련 요소
     const addModalEl = document.getElementById('schedule-modal');
     const addModalInstance = new bootstrap.Modal(addModalEl);
     const scheduleForm = document.getElementById('schedule-form');
@@ -31,6 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const scheduleCategoryInput = document.getElementById('schedule-category');
     const schedulePrioritySelect = document.getElementById('schedule-priority');
     const cancelAddModalBtn = document.getElementById('cancel-modal-btn');
+
+    // 공지 상세/수정 모달 관련 요소
     const detailsModalEl = document.getElementById('details-modal');
     const detailsModalInstance = new bootstrap.Modal(detailsModalEl);
     const detailsIdInput = document.getElementById('details-id');
@@ -43,15 +48,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelEditBtn = document.getElementById('cancel-edit-btn');
     const updateScheduleBtn = document.getElementById('update-schedule-btn');
 
+    // 로컬 스토리지에서 일정 불러옴
     async function fetchAnnouncements() {
         const storedSchedules = localStorage.getItem(getCalendarKey());
         return storedSchedules ? JSON.parse(storedSchedules) : [];
     }
 
+    // 드롭다운에 카테고리 옵션 채움
     function populateCategoryDropdowns() {
         const storedCategories = localStorage.getItem(getCategoriesKey());
-        const categories = storedCategories ? JSON.parse(storedCategories) : ['수업', '장학', '행사', '기타'];
+        const categories = storedCategories ? JSON.parse(storedCategories) : ['수업', '장학', '행사', '기타']; //기본 카테고리
 
+        // 검색 카테고리 드롭다운 업데이트
         searchCategorySelect.innerHTML = '<option value="">전체</option>';
         categories.forEach(cat => {
             const option = document.createElement('option');
@@ -60,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
             searchCategorySelect.appendChild(option);
         });
 
+        // 일정 추가/수정 모달의 카테고리 드롭다운 업데이트
         const dropdowns = [scheduleCategoryInput, detailsEditCategorySelect];
         dropdowns.forEach(dropdown => {
             dropdown.innerHTML = '<option value="" disabled selected>분류 선택</option>';
@@ -72,12 +81,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // 일정 요소를 생성하여 반환
     function createScheduleElement(schedule, isHighlighted) {
         const scheduleItem = document.createElement('div');
         scheduleItem.className = 'schedule-item';
         scheduleItem.dataset.id = schedule.id;
         scheduleItem.textContent = schedule.title;
 
+        // 하이라이트 여부
         if (isHighlighted) {
             scheduleItem.style.backgroundColor = schedule.color;
             scheduleItem.style.color = 'white';
@@ -89,8 +100,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return scheduleItem;
     }
 
+    // 달력을 렌더링하고 해당 월의 일정을 표시
     function renderCalendar(date, schedulesToRender, highlightedSchedules = []) {
-        // 주어진 날짜에 해당하는 달력을 그리고 일정을 렌더링
         const year = date.getFullYear();
         const month = date.getMonth();
         yearInput.value = year;
@@ -115,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         let day = 1;
 
+        // 달력 날짜 채우기
         for (let i = 0; i < 6; i++) {
             const row = tbody.insertRow();
             for (let j = 0; j < 7; j++) {
@@ -133,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     dayDiv.textContent = day;
                     cell.appendChild(dayDiv);
 
+                    // 해당 날짜의 일정 표시
                     schedulesToRender.forEach(schedule => {
                         if (schedule.date === fullDate) {
                             const isHighlighted = highlightedSchedules.some(hs => hs.id === schedule.id);
@@ -148,8 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
         calendarContainer.appendChild(table);
     }
 
+    // 일정 목록을 테이블 형태로 렌더링하고 표시
     function renderScheduleList(schedulesToRender, highlightedSchedules = []) {
-        // 주어진 일정 목록을 테이블 형태로 렌더링
         let listHtml = `<table class="table table-hover" style="font-size: 0.9rem;"><thead class="blue-header"><tr><th>날짜</th><th>분류</th><th>제목</th><th>중요도</th></tr></thead><tbody>`;
         if (schedulesToRender.length === 0) {
             listHtml += '<tr><td colspan="4" class="text-center text-muted">해당하는 공지가 없습니다.</td></tr>';
@@ -166,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
         scheduleListContainer.innerHTML = listHtml;
     }
 
+    // 현재 월의 달력과 일정 목록을 모두 렌더링
     function renderAll() {
         const currentMonthSchedules = allSchedules.filter(s =>
             new Date(s.date).getFullYear() === currentDate.getFullYear() &&
@@ -175,8 +189,8 @@ document.addEventListener('DOMContentLoaded', () => {
         renderScheduleList(currentMonthSchedules);
     }
 
+    // 검색 조건에 따라 일정을 필터링하고 화면을 다시 렌더링
     function handleSearch() {
-        // 검색 조건에 따라 일정을 필터링하고 화면을 다시 렌더링
         const category = searchCategorySelect.value;
         const priority = searchPrioritySelect.value;
         const keyword = searchKeywordInput.value.toLowerCase();
@@ -193,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // 검색 조건에 맞는 일정 필터링
         const filteredSchedules = currentMonthSchedules.filter(s => {
             const categoryMatch = !category || (s.category || '미지정') === category;
             const priorityMatch = !priority || (s.priority || '보통') === priority;
@@ -204,6 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderScheduleList(filteredSchedules);
     }
 
+    // 일정 추가 모달 열기
     function openAddModal(date) {
         scheduleForm.reset();
         scheduleDateInput.value = date;
@@ -211,11 +227,13 @@ document.addEventListener('DOMContentLoaded', () => {
         addModalEl.addEventListener('shown.bs.modal', () => scheduleTitleInput.focus());
     }
 
+    // 일정 추가 모달 닫기
     function closeAddModal() {
         scheduleForm.reset();
         addModalInstance.hide();
     }
 
+    // 새 일정을 추가하고 로컬 스토리지에 저장
     function addSchedule(e) {
         e.preventDefault();
         if (!scheduleCategoryInput.value) {
@@ -238,6 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderAll();
     }
 
+    // 일정 상세/수정 모달 열기
     function openDetailsModal(id) {
         const schedule = allSchedules.find(s => s.id === id);
         if (schedule) {
@@ -252,10 +271,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 일정 상세/수정 모달 닫기
     function closeDetailsModal() {
         detailsModalInstance.hide();
     }
 
+    // 기존 일정 업데이트하고 로컬 스토리지에 저장
     function updateSchedule() {
         if (!detailsEditCategorySelect.value) {
             alert('분류를 선택해주세요.');
@@ -277,6 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 일정을 삭제하고 로컬 스토리지에 저장
     function deleteSchedule() {
         if (confirm('정말로 이 공지를 삭제하시겠습니까?')) {
             allSchedules = allSchedules.filter(s => s.id !== currentScheduleId);
