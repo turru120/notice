@@ -11,12 +11,14 @@ try {
 
     $request_data = json_decode(file_get_contents('php://input'), true);
 
+    // 필수 데이터 존재 여부 확인
     if (!isset($request_data['email']) || !isset($request_data['userId'])) {
         throw new Exception('Email or User ID not provided.');
     }
     $new_email = $request_data['email'];
     $current_user_id = $request_data['userId'];
 
+    // 이메일 형식 유효성 검사
     if (!filter_var($new_email, FILTER_VALIDATE_EMAIL)) {
         throw new Exception('Invalid email format.');
     }
@@ -30,6 +32,7 @@ try {
     }
 
     $user_found = false;
+    // 사용자 정보 업데이트
     foreach ($users_data as &$user) {
         if ($user['id'] === $current_user_id) {
             $user['email'] = $new_email;
