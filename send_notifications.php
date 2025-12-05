@@ -58,7 +58,7 @@ if (json_last_error() !== JSON_ERROR_NONE) {
 
 // 모든 사용자를 순회하며 알림을 보낼지 결정
 foreach ($users as $user) {
-    // 사용자가 이메일을 받을 조건 확인
+    // 이메일을 받을 조건 확인
     if (empty($user['notification']) || empty($user['email']) || empty($user['registered_sites'])) {
         continue;
     }
