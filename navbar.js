@@ -57,6 +57,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     window.renderNavbar = renderNavbar;
 
+    function logout() {
+        localStorage.removeItem('current_user_id');
+        localStorage.removeItem('current_user_name');
+        window.location.href = 'login.html';
+    }
+
+    const logoutBtn = document.getElementById('logout-btn');
+    if(logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            logout();
+        });
+    }
+
     renderNavbar();
 });
 

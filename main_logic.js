@@ -13,12 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return `managed_categories_${userId || 'guest'}`;
     }
 
-    function formatDate(dateString) {
-        if (!dateString) return '';
-        const [year, month, day] = dateString.split('-');
-        return `${year.substring(2)}/${month}/${day}`;
-    }
-
     const calendarContainer = document.getElementById('calendar-container');
     const scheduleListContainer = document.getElementById('schedule-list-container');
     const searchCategorySelect = document.getElementById('search-category');
@@ -54,10 +48,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return storedSchedules ? JSON.parse(storedSchedules) : [];
     }
 
-    function populateCategoryFilter() {
+    function populateCategoryDropdowns() {
         const storedCategories = localStorage.getItem(getCategoriesKey());
         const categories = storedCategories ? JSON.parse(storedCategories) : ['수업', '장학', '행사', '기타'];
 
+        // For search filter
         searchCategorySelect.innerHTML = '<option value="">전체</option>';
         categories.forEach(cat => {
             const option = document.createElement('option');
@@ -65,12 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
             option.textContent = cat;
             searchCategorySelect.appendChild(option);
         });
-    }
 
-    function populateModalCategoryDropdowns() {
-        const storedCategories = localStorage.getItem(getCategoriesKey());
-        const categories = storedCategories ? JSON.parse(storedCategories) : ['수업', '장학', '행사', '기타'];
-
+        // For modal dropdowns
         const dropdowns = [scheduleCategoryInput, detailsEditCategorySelect];
         dropdowns.forEach(dropdown => {
             dropdown.innerHTML = '<option value="" disabled selected>분류 선택</option>';
@@ -166,7 +157,9 @@ document.addEventListener('DOMContentLoaded', () => {
             schedulesToRender.forEach(s => {
                 const isHighlighted = highlightedSchedules.length > 0 && highlightedSchedules.some(hs => hs.id === s.id);
                 const style = isHighlighted ? `style="background-color: ${s.color}; color: white;"` : '';
-                listHtml += `<tr data-id="${s.id}" style="cursor: pointer;"><td>${formatDate(s.date)}</td><td>${s.category || '미지정'}</td><td>${s.title}</td><td>${s.priority || '보통'}</td></tr>`;
+                const date = new Date(s.date);
+                const formattedDate = `${String(date.getFullYear()).substring(2)}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+                listHtml += `<tr data-id="${s.id}" style="cursor: pointer;"><td>${formattedDate}</td><td>${s.category || '미지정'}</td><td>${s.title}</td><td>${s.priority || '보통'}</td></tr>`;
             });
         }
         listHtml += '</tbody></table>';
@@ -332,8 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('storage', (e) => {
         if (e.key === getCategoriesKey()) {
-            populateCategoryFilter();
-            populateModalCategoryDropdowns();
+            populateCategoryDropdowns();
         }
         if (e.key === getCalendarKey()) {
             initialize();
@@ -342,8 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function initialize() {
         allSchedules = await fetchAnnouncements();
-        populateCategoryFilter();
-        populateModalCategoryDropdowns();
+        populateCategoryDropdowns();
 
         yearInput.value = currentDate.getFullYear();
         monthInput.value = currentDate.getMonth() + 1;
