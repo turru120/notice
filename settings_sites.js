@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const siteIdInput = document.getElementById('site-id');
     const siteNameInput = document.getElementById('site-name');
     const siteUrlInput = document.getElementById('site-url');
-    // [MODIFIED] Add CSS selector inputs
     const noticeListSelectorInput = document.getElementById('site-notice-list-selector');
     const noticeTitleSelectorInput = document.getElementById('site-notice-title-selector');
     const noticeDateSelectorInput = document.getElementById('site-notice-date-selector');
@@ -37,7 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     id: site.id || Date.now() + index,
                     name: site.site_name,
                     url: site.site_url,
-                    // [MODIFIED] Include selector fields
                     notice_list_selector: site.notice_list_selector || '',
                     notice_title_selector: site.notice_title_selector || '',
                     notice_date_selector: site.notice_date_selector || '',
@@ -59,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // [MODIFIED] Include selector fields in the payload
         const sitesToSave = sites.map(site => ({
             site_name: site.name,
             site_url: site.url,
@@ -88,11 +85,31 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!result.success) {
                 throw new Error(result.message || 'Failed to save sites.');
             }
-             // Reload sites to reflect immediate changes from the server if any
             await loadSites();
-            // Also render the navbar if it exists
             if (window.renderNavbar) {
                 window.renderNavbar();
+            }
+
+            // [수정] 사이트 색상 변경 시 달력의 일정 색상도 즉시 업데이트 - 디자인 일관성 유지
+            const newColorMap = new Map(sites.map(site => [site.name, site.color]));
+
+            const calendarKey = `calendar_schedules_${userId || 'guest'}`;
+            const storedSchedules = localStorage.getItem(calendarKey);
+            let allSchedules = storedSchedules ? JSON.parse(storedSchedules) : [];
+
+            let schedulesModified = false;
+            allSchedules.forEach(schedule => {
+                if (newColorMap.has(schedule.site)) {
+                    const newColor = newColorMap.get(schedule.site);
+                    if (schedule.color !== newColor) {
+                        schedule.color = newColor;
+                        schedulesModified = true;
+                    }
+                }
+            });
+
+            if (schedulesModified) {
+                localStorage.setItem(calendarKey, JSON.stringify(allSchedules));
             }
 
         } catch (error) {
@@ -166,7 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 siteIdInput.value = site.id;
                 siteNameInput.value = site.name;
                 siteUrlInput.value = site.url;
-                // [MODIFIED] Populate selector fields for editing
                 noticeListSelectorInput.value = site.notice_list_selector || '';
                 noticeTitleSelectorInput.value = site.notice_title_selector || '';
                 noticeDateSelectorInput.value = site.notice_date_selector || '';
