@@ -1,0 +1,10 @@
+<?php
+return [
+    'smtp_host' => 'smtp.gmail.com',
+    'smtp_port' => 587,
+    'smtp_username' => 'your_email@gmail.com',
+    'smtp_password' => 'your_app_password',
+    'smtp_from_address' => 'your_email@gmail.com',
+    // [수정] 메일 발송자 이름을 '공지사항 모아보기'로 변경
+    'smtp_from_name' => '공지사항 모아보기'
+];
