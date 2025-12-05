@@ -18,15 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let sites = [];
     let isEditMode = false;
     const defaultColors = [
-        '#007BFF', // Bootstrap primary
-        '#28A745', // Bootstrap success
-        '#DC3545', // Bootstrap danger
-        '#FFC107', // Bootstrap warning
-        '#17A2B8', // Bootstrap info
-        '#6610f2', // Purple
-        '#fd7e14', // Orange
-        '#e83e8c', // Pink
-        '#20c997'  // Teal
+        '#007BFF', '#28A745', '#DC3545', '#FFC107', '#17A2B8', '#6610f2', '#fd7e14', '#e83e8c', '#20c997'
     ];
 
     async function loadSites() {
@@ -225,9 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 site.notice_date_selector = dateSelector;
             }
         } else {
-            // 새 사이트 추가 시 기본 색상 할당
-            // defaultColors 배열에서 현재 등록된 사이트 수에 따라 순환하며 색상을 선택합니다.
-            // 이렇게 하면 새로 추가되는 사이트에 다양한 기본 색상이 부여됩니다.
+            // [추가] 새 사이트 추가 시 기본 색 할당 - 사용자 편의성 향상
             const newColor = defaultColors[sites.length % defaultColors.length];
             sites.push({
                 id: Date.now(),
