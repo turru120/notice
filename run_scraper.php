@@ -24,7 +24,7 @@ $scraper_command = escapeshellcmd($php_executable) . ' ' . escapeshellarg($scrap
 $scraper_output = shell_exec($scraper_command);
 $output['scraper'] = $scraper_output;
 
-// 메알 발송 스크립트 실행
+// 메일 발송 스크립트 실행
 $notifier_command = escapeshellcmd($php_executable) . ' ' . escapeshellarg($notifier_script_path);
 $notifier_output = shell_exec($notifier_command);
 $output['notifier'] = $notifier_output;
