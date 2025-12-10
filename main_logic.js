@@ -252,6 +252,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return categoryMatch && priorityMatch && keywordMatch;
         });
 
+        // [추가] 검색 결과 공지 목록 날짜 및 중요도 순으로 정렬 - 사용자 편의성
+        const priorityOrder = { '높음': 3, '보통': 2, '낮음': 1 };
+        filteredNotices.sort((a, b) => {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+
+            if (dateA - dateB !== 0) {
+                return dateA - dateB;
+            }
+
+            const priorityA = priorityOrder[a.priority] || 2;
+            const priorityB = priorityOrder[b.priority] || 2;
+            return priorityB - priorityA;
+        });
+
         renderCalendar(currentDate, currentMonthNotices, filteredNotices);
         renderNoticeList(filteredNotices);
     }
