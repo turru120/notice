@@ -18,12 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // 공지 추가 모달 관련 요소
     const addModalEl = document.getElementById('notice-modal');
     const addModalInstance = addModalEl ? new bootstrap.Modal(addModalEl) : null;
-    const scheduleForm = document.getElementById('notice-form');
-    const scheduleDateInput = document.getElementById('notice-date');
-    const scheduleTitleInput = document.getElementById('notice-title');
-    const scheduleContentInput = document.getElementById('notice-content');
-    const scheduleCategoryInput = document.getElementById('notice-category');
-    const schedulePrioritySelect = document.getElementById('notice-priority');
+    const noticeForm = document.getElementById('notice-form');
+    const noticeDateInput = document.getElementById('notice-date');
+    const noticeTitleInput = document.getElementById('notice-title');
+    const noticeContentInput = document.getElementById('notice-content');
+    const noticeCategoryInput = document.getElementById('notice-category');
+    const noticePrioritySelect = document.getElementById('notice-priority');
     const cancelAddModalBtn = document.getElementById('cancel-modal-btn');
 
     // 공지 상세/수정 모달 관련 요소
@@ -35,9 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const detailsEditContentInput = document.getElementById('details-edit-content');
     const detailsEditCategorySelect = document.getElementById('details-edit-category');
     const detailsEditPrioritySelect = document.getElementById('details-edit-priority');
-    const deleteScheduleBtn = document.getElementById('delete-schedule-btn');
+    const deleteNoticeBtn = document.getElementById('delete-notice-btn');
     const cancelEditBtn = document.getElementById('cancel-edit-btn');
-    const updateScheduleBtn = document.getElementById('update-schedule-btn');
+    const updateNoticeBtn = document.getElementById('update-notice-btn');
 
     // 로컬 스토리지에서 공지 불러옴
     async function fetchAnnouncements() {
@@ -99,14 +99,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 하이라이트 여부
         if (isHighlighted) {
-            scheduleItem.style.backgroundColor = schedule.color;
-            scheduleItem.style.color = 'white';
+            noticeItem.style.backgroundColor = notice.color;
+            noticeItem.style.color = 'white';
         } else {
-            scheduleItem.style.border = `2px solid ${schedule.color}`;
-            scheduleItem.style.backgroundColor = 'white';
-            scheduleItem.style.color = '#333';
+            noticeItem.style.border = `2px solid ${notice.color}`;
+            noticeItem.style.backgroundColor = 'white';
+            noticeItem.style.color = '#333';
         }
-        return scheduleItem;
+        return noticeItem;
     }
 
     // 달력을 렌더링하고 해당 월의 공지를 표시
@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function initialize() {
         // 저장된 모든 공지를 불러오고 화면 구성
-        allSchedules = await fetchAnnouncements();
+        allNotices = await fetchAnnouncements();
         populateCategoryDropdowns();
 
         yearInput.value = currentDate.getFullYear();
