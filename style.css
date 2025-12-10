@@ -195,7 +195,7 @@ tbody tr:hover {
     cursor: default !important;
 }
 
-.schedule-item {
+.notice-item {
     color: white;
     font-size: 0.75em;
     padding: 2px 5px;
@@ -212,7 +212,7 @@ tbody tr:hover {
     opacity: 0.8;
 }
 
-#schedule-list-container th {
+#notice-list-container th {
     text-align: center;
 }
 
