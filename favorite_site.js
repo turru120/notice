@@ -43,44 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
         announcementsListEl.innerHTML = feedHtml;
     }
 
-    // 페이지네이션 컨트롤을 UI에 렌더링
-    function renderPagination(totalItems) {
-        paginationContainer.innerHTML = '';
-        const totalPages = Math.ceil(totalItems / itemsPerPage);
-        if (totalPages <= 1) return;
-
-        // [보완] 페이지네이션 바에 페이지 번호 수 표시되는 방식 변경 - 사용자 편의성 향상
-        // 페이지네이션 바에 한 번에 표시될 최대 페이지 번호 수 10-> 5로 줄이고, 현재 페이지를 중심으로 총 5개 표시
-        const maxPageNumbers = 5;
-        let startPage = Math.max(1, currentPage - Math.floor(maxPageNumbers / 2));
-        let endPage = Math.min(totalPages, startPage + maxPageNumbers - 1);
-
-        if (endPage - startPage + 1 < maxPageNumbers) {
-            startPage = Math.max(1, endPage - maxPageNumbers + 1);
-        }
-
-        let paginationHtml = `<ul class="pagination justify-content-center">`;
-        paginationHtml += `
-            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                <a class="page-link" href="#" data-page="${currentPage - 1}">&lt;</a>
-            </li>
-        `;
-        for (let i = startPage; i <= endPage; i++) {
-            paginationHtml += `
-                <li class="page-item ${i === currentPage ? 'active' : ''}">
-                    <a class="page-link" href="#" data-page="${i}">${i}</a>
-                </li>
-            `;
-        }
-        paginationHtml += `
-            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-                <a class="page-link" href="#" data-page="${currentPage + 1}">&gt;</a>
-            </li>
-        `;
-        paginationHtml += `</ul>`;
-        paginationContainer.innerHTML = paginationHtml;
-    }
-
     // URL에서 site ID를 가져와 해당 사이트의 공지사항을 로드 및 렌더링
     async function initialize() {
         try {
@@ -110,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             allAnnouncementsForSite = allNotices.filter(notice => notice.site === currentSite.site_name);
 
             renderFeed(currentPage);
-            renderPagination(allAnnouncementsForSite.length);
+            renderPagination(paginationContainer, allAnnouncementsForSite.length, currentPage, itemsPerPage);
 
         } catch (error) {
             if (siteTitleEl) {
@@ -131,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (page >= 1 && page <= Math.ceil(allAnnouncementsForSite.length / itemsPerPage)) {
                 currentPage = page;
                 renderFeed(currentPage);
-                renderPagination(allAnnouncementsForSite.length);
+                renderPagination(paginationContainer, allAnnouncementsForSite.length, currentPage, itemsPerPage);
             }
         }
     });

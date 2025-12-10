@@ -1,16 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const mypageUserName = document.getElementById('mypage-user-name');
 
-    function getCategoriesKey() {
-        const userId = localStorage.getItem('current_user_id');
-        return `managed_categories_${userId || 'guest'}`;
-    }
-
-    function getCalendarKey() {
-        const userId = localStorage.getItem('current_user_id');
-        return `calendar_schedules_${userId || 'guest'}`;
-    }
-
     // DOM 요소 참조 (주요 UI 컴포넌트)
     const categoryList = document.getElementById('category-list');
     const newCategoryInput = document.getElementById('new-category-input');

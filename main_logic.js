@@ -3,16 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentDate = new Date();
     let currentScheduleId = null;
 
-    function getCalendarKey() {
-        const userId = localStorage.getItem('current_user_id');
-        return `calendar_schedules_${userId || 'guest'}`;
-    }
-
-    function getCategoriesKey() {
-        const userId = localStorage.getItem('current_user_id');
-        return `managed_categories_${userId || 'guest'}`;
-    }
-
     // DOM 요소 참조 (주요 UI 컴포넌트)
     const calendarContainer = document.getElementById('calendar-container');
     const scheduleListContainer = document.getElementById('schedule-list-container');
