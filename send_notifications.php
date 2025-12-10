@@ -117,6 +117,7 @@ foreach ($users as $user) {
             $mail->Password = $config['smtp_password'];
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = $config['smtp_port'];
+            $mail->Timeout = 10;
 
             $mail->CharSet = 'UTF-8';
 

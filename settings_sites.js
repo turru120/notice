@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // 사이트 추가/수정 모달 관련 요소
     const siteModalEl = document.getElementById('site-modal');
-    const siteModal = new bootstrap.Modal(siteModalEl);
+    const siteModal = siteModalEl ? new bootstrap.Modal(siteModalEl) : null;
     const siteForm = document.getElementById('site-form');
     const siteIdInput = document.getElementById('site-id');
     const siteNameInput = document.getElementById('site-name');
@@ -51,7 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             renderTable();
         } catch (error) {
-            tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">사이트 목록을 불러오는데 실패했습니다.</td></tr>`;
+            if (tableBody) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">사이트 목록을 불러오는데 실패했습니다.</td></tr>`;
+            } else {
+                console.error('필수 DOM 요소(tableBody)가 없어 사이트 목록 로딩 실패 메시지를 표시할 수 없습니다.', error);
+            }
         }
     }
 
@@ -101,7 +105,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const calendarKey = `calendar_schedules_${userId || 'guest'}`;
             const storedSchedules = localStorage.getItem(calendarKey);
-            let allSchedules = storedSchedules ? JSON.parse(storedSchedules) : [];
+            let allSchedules;
+            try {
+                allSchedules = storedSchedules ? JSON.parse(storedSchedules) : [];
+            } catch (e) {
+                console.error('로컬 스토리지의 일정 데이터 파싱 오류:', e);
+                localStorage.removeItem(calendarKey);
+                allSchedules = [];
+            }
 
             let schedulesModified = false;
             allSchedules.forEach(schedule => {
@@ -125,6 +136,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 현재 사이트 목록을 테이블 형태로 렌더링
     function renderTable() {
+        if (!tableBody) {
+            console.error('필수 DOM 요소(tableBody)가 없어 테이블을 렌더링할 수 없습니다.');
+            return;
+        }
         tableBody.innerHTML = '';
         sites.forEach(site => {
             const row = document.createElement('tr');
@@ -158,11 +173,18 @@ document.addEventListener('DOMContentLoaded', () => {
             tableBody.appendChild(row);
         });
 
-        actionsHeader.style.display = isEditMode ? 'table-cell' : 'none';
+        if (actionsHeader) {
+            actionsHeader.style.display = isEditMode ? 'table-cell' : 'none';
+        }
     }
 
     // 편집 모드를 토글하고 변경 사항 저장
     async function toggleEditMode() {
+        if (!editModeBtn) {
+            console.error('필수 DOM 요소(editModeBtn)가 없어 편집 모드를 토글할 수 없습니다.');
+            return;
+        }
+
         if (isEditMode) {
             const favoriteCheckboxes = document.querySelectorAll('.favorite-checkbox');
             const colorInputs = document.querySelectorAll('.site-color-input');
@@ -183,12 +205,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 사이트 추가/수정 모달을 열고 폼 데이터 설정
     function openModal(siteId = null) {
+        if (!siteForm || !siteIdInput || !siteNameInput || !siteUrlInput || !noticeListSelectorInput || !noticeTitleSelectorInput || !noticeDateSelectorInput || !siteModal) {
+            console.error('필수 DOM 요소(siteForm 등)가 없어 사이트 추가/수정 모달을 열 수 없습니다.');
+            return;
+        }
+
         siteForm.reset();
         if (siteId) {
             // 사이트 수정 모드
             const site = sites.find(s => s.id === siteId);
             if (site) {
-                document.getElementById('site-modal-label').textContent = '사이트 수정';
+                const siteModalLabel = document.getElementById('site-modal-label');
+                if (siteModalLabel) siteModalLabel.textContent = '사이트 수정';
                 siteIdInput.value = site.id;
                 siteNameInput.value = site.name;
                 siteUrlInput.value = site.url;
@@ -198,7 +226,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             // 새 사이트 추가 모드
-            document.getElementById('site-modal-label').textContent = '사이트 추가';
+            const siteModalLabel = document.getElementById('site-modal-label');
+            if (siteModalLabel) siteModalLabel.textContent = '사이트 추가';
             siteIdInput.value = '';
         }
         siteModal.show();
@@ -206,6 +235,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 사이트 추가 또는 수정 요청을 처리하고 서버에 저장
     async function handleSave() {
+        if (!siteIdInput || !siteNameInput || !siteUrlInput || !noticeListSelectorInput || !noticeTitleSelectorInput || !noticeDateSelectorInput || !siteModal) {
+            console.error('필수 DOM 요소(siteIdInput 등)가 없어 사이트 정보를 저장할 수 없습니다.');
+            return;
+        }
         const id = siteIdInput.value ? Number(siteIdInput.value) : null;
         const name = siteNameInput.value.trim();
         const url = siteUrlInput.value.trim();
@@ -263,22 +296,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    addSiteBtn.addEventListener('click', () => openModal());
-    editModeBtn.addEventListener('click', toggleEditMode);
-    saveSiteBtn.addEventListener('click', handleSave);
-    tableBody.addEventListener('click', handleTableClick);
+    if (addSiteBtn) {
+        addSiteBtn.addEventListener('click', () => openModal());
+    }
+    if (editModeBtn) {
+        editModeBtn.addEventListener('click', toggleEditMode);
+    }
+    if (saveSiteBtn) {
+        saveSiteBtn.addEventListener('click', handleSave);
+    }
+    if (tableBody) {
+        tableBody.addEventListener('click', handleTableClick);
 
-    tableBody.addEventListener('change', (e) => {
-        if (isEditMode && e.target.classList.contains('favorite-checkbox')) {
-            if (e.target.checked) {
-                const checkedCount = tableBody.querySelectorAll('.favorite-checkbox:checked').length;
-                if (checkedCount > 3) {
-                    alert('즐겨찾기는 최대 3개까지 선택할 수 있습니다.');
-                    e.target.checked = false;
+        tableBody.addEventListener('change', (e) => {
+            if (isEditMode && e.target.classList.contains('favorite-checkbox')) {
+                if (e.target.checked) {
+                    const checkedCount = tableBody.querySelectorAll('.favorite-checkbox:checked').length;
+                    if (checkedCount > 3) {
+                        alert('즐겨찾기는 최대 3개까지 선택할 수 있습니다.');
+                        e.target.checked = false;
+                    }
                 }
             }
-        }
-    });
+        });
+    }
 
     loadSites();
 });

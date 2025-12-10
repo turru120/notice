@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const navbarLinksContainer = document.getElementById('navbar-links');
         const settingsDropdown = document.getElementById('settings-dropdown-li');
 
-        if (!navbarLinksContainer) return;
+        if (!navbarLinksContainer || !settingsDropdown) return;
 
         // 기존 내비게이션 링크 제거 (설정 제외)
         while (navbarLinksContainer.firstChild && navbarLinksContainer.firstChild.id !== 'settings-dropdown-li') {

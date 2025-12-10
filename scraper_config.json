@@ -34,5 +34,11 @@
         "list_selector": "tbody",
         "title_selector": "a",
         "date_selector": "td.date"
+    },
+    "드림스폰": {
+        "encoding": "UTF-8",
+        "list_selector": "//div[@class='bo_table']/table/tbody/tr",
+        "title_selector": ".//td[@class='td_subject']/p[@class='title']/a",
+        "date_selector": ".//td[@class='td_day']"
     }
 }

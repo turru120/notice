@@ -60,7 +60,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // 로컬 스토리지에서 카테고리 목록을 불러옴
     function loadCategories() {
         const storedCategories = localStorage.getItem(getCategoriesKey());
-        categories = storedCategories ? JSON.parse(storedCategories) : ['수업', '장학', '행사', '기타']; // 기본 카테고리
+        try {
+            categories = storedCategories ? JSON.parse(storedCategories) : ['수업', '장학', '행사', '기타']; // 기본 카테고리
+        } catch (e) {
+            console.error('로컬 스토리지의 카테고리 데이터 파싱 오류:', e);
+            localStorage.removeItem(getCategoriesKey());
+            categories = ['수업', '장학', '행사', '기타'];
+        }
     }
 
     // 카테고리 목록을 로컬 스토리지에 저장
@@ -114,7 +120,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <button id="save-email-btn" class="btn btn-success btn-sm">저장</button>
             `;
-            document.getElementById('save-email-btn').addEventListener('click', handleSaveEmail);
+            const saveEmailBtn = document.getElementById('save-email-btn');
+            if (saveEmailBtn) {
+                saveEmailBtn.addEventListener('click', handleSaveEmail);
+            }
         } else {
             // 이메일 보기 모드
             emailSection.innerHTML = `
@@ -124,7 +133,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <button id="edit-email-btn" class="btn btn-outline-secondary btn-sm">편집</button>
             `;
-            document.getElementById('edit-email-btn').addEventListener('click', toggleEmailEditMode);
+            const editEmailBtn = document.getElementById('edit-email-btn');
+            if (editEmailBtn) {
+                editEmailBtn.addEventListener('click', toggleEmailEditMode);
+            }
         }
     }
 
@@ -160,6 +172,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 새 카테고리 추가
     function handleAddCategory() {
+        if (!newCategoryInput) {
+            console.error('필수 DOM 요소(newCategoryInput)가 없어 카테고리를 추가할 수 없습니다.');
+            return;
+        }
         const newCategory = newCategoryInput.value.trim();
         if (newCategory && !categories.includes(newCategory)) {
             categories.push(newCategory);
@@ -183,7 +199,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 // [보완] 삭제된 분류를 사용하던 모든 일정의 분류를 리셋 - 사용자 편의성 향상
                 const calendarKey = getCalendarKey();
                 const storedSchedules = localStorage.getItem(calendarKey);
-                let allSchedules = storedSchedules ? JSON.parse(storedSchedules) : [];
+                let allSchedules;
+                try {
+                    allSchedules = storedSchedules ? JSON.parse(storedSchedules) : [];
+                } catch (e) {
+                    console.error('로컬 스토리지의 일정 데이터 파싱 오류:', e);
+                    localStorage.removeItem(calendarKey);
+                    allSchedules = [];
+                }
 
                 let schedulesModified = false;
                 allSchedules.forEach(schedule => {
@@ -209,6 +232,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // 변경된 이메일 주소를 서버에 저장
     async function handleSaveEmail() {
         const emailInput = document.getElementById('email-input');
+        if (!emailInput) {
+            console.error('필수 DOM 요소(emailInput)가 없어 이메일을 저장할 수 없습니다.');
+            return;
+        }
         const newEmail = emailInput.value.trim();
         if (!newEmail) {
             alert('이메일 주소를 입력해주세요.');
@@ -243,6 +270,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 알림 받을 사이트 목록의 편집/완료 버튼을 눌렀을 때 실행
     async function toggleSitesEditMode() {
+        if (!editSitesBtn) {
+            console.error('필수 DOM 요소(editSitesBtn)가 없어 사이트 편집 모드를 토글할 수 없습니다.');
+            return;
+        }
         if (isSitesEditMode) {
             isSitesEditMode = false;
             editSitesBtn.textContent = '저장 중';
