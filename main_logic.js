@@ -1,11 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
-    let allSchedules = [];
+    // [수정] 일정 -> 공지로 명칭 통일 - 사용자 혼동 방지
+    let allNotices = [];
     let currentDate = new Date();
-    let currentScheduleId = null;
+    let currentNoticeId = null;
 
     // DOM 요소 참조 (주요 UI 컴포넌트)
     const calendarContainer = document.getElementById('calendar-container');
-    const scheduleListContainer = document.getElementById('schedule-list-container');
+    const noticeListContainer = document.getElementById('notice-list-container');
     const searchCategorySelect = document.getElementById('search-category');
     const searchPrioritySelect = document.getElementById('search-priority');
     const searchKeywordInput = document.getElementById('search-keyword');
@@ -14,15 +15,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthInput = document.getElementById('month-input');
     const renderBtn = document.getElementById('render-calendar-btn');
 
-    // 일정 추가 모달 관련 요소
-    const addModalEl = document.getElementById('schedule-modal');
+    // 공지 추가 모달 관련 요소
+    const addModalEl = document.getElementById('notice-modal');
     const addModalInstance = addModalEl ? new bootstrap.Modal(addModalEl) : null;
-    const scheduleForm = document.getElementById('schedule-form');
-    const scheduleDateInput = document.getElementById('schedule-date');
-    const scheduleTitleInput = document.getElementById('schedule-title');
-    const scheduleContentInput = document.getElementById('schedule-content');
-    const scheduleCategoryInput = document.getElementById('schedule-category');
-    const schedulePrioritySelect = document.getElementById('schedule-priority');
+    const scheduleForm = document.getElementById('notice-form');
+    const scheduleDateInput = document.getElementById('notice-date');
+    const scheduleTitleInput = document.getElementById('notice-title');
+    const scheduleContentInput = document.getElementById('notice-content');
+    const scheduleCategoryInput = document.getElementById('notice-category');
+    const schedulePrioritySelect = document.getElementById('notice-priority');
     const cancelAddModalBtn = document.getElementById('cancel-modal-btn');
 
     // 공지 상세/수정 모달 관련 요소
@@ -38,13 +39,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelEditBtn = document.getElementById('cancel-edit-btn');
     const updateScheduleBtn = document.getElementById('update-schedule-btn');
 
-    // 로컬 스토리지에서 일정 불러옴
+    // 로컬 스토리지에서 공지 불러옴
     async function fetchAnnouncements() {
-        const storedSchedules = localStorage.getItem(getCalendarKey());
+        const storedNotices = localStorage.getItem(getCalendarKey());
         try {
-            return storedSchedules ? JSON.parse(storedSchedules) : [];
+            return storedNotices ? JSON.parse(storedNotices) : [];
         } catch (e) {
-            console.error('로컬 스토리지의 일정 데이터 파싱 오류:', e);
+            console.error('로컬 스토리지의 공지 데이터 파싱 오류:', e);
             localStorage.removeItem(getCalendarKey());
             return [];
         }
@@ -73,9 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // 일정 추가/수정 모달의 카테고리 드롭다운 업데이트
+        // 공지 추가/수정 모달의 카테고리 드롭다운 업데이트
         const dropdowns = [];
-        if (scheduleCategoryInput) dropdowns.push(scheduleCategoryInput);
+        if (noticeCategoryInput) dropdowns.push(noticeCategoryInput);
         if (detailsEditCategorySelect) dropdowns.push(detailsEditCategorySelect);
 
         dropdowns.forEach(dropdown => {
@@ -89,12 +90,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 일정 요소를 생성하여 반환
-    function createScheduleElement(schedule, isHighlighted) {
-        const scheduleItem = document.createElement('div');
-        scheduleItem.className = 'schedule-item';
-        scheduleItem.dataset.id = schedule.id;
-        scheduleItem.textContent = schedule.title;
+    // 공지 요소를 생성하여 반환
+    function createNoticeElement(notice, isHighlighted) {
+        const noticeItem = document.createElement('div');
+        noticeItem.className = 'notice-item';
+        noticeItem.dataset.id = notice.id;
+        noticeItem.textContent = notice.title;
 
         // 하이라이트 여부
         if (isHighlighted) {
@@ -108,8 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return scheduleItem;
     }
 
-    // 달력을 렌더링하고 해당 월의 일정을 표시
-    function renderCalendar(date, schedulesToRender, highlightedSchedules = []) {
+    // 달력을 렌더링하고 해당 월의 공지를 표시
+    function renderCalendar(date, noticesToRender, highlightedNotices = []) {
         if (!yearInput || !monthInput || !calendarContainer) {
             console.error('필수 DOM 요소(yearInput, monthInput, calendarContainer)가 없어 달력을 렌더링할 수 없습니다.');
             return;
@@ -158,12 +159,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     dayDiv.textContent = day;
                     cell.appendChild(dayDiv);
 
-                    // 해당 날짜의 일정 표시
-                    schedulesToRender.forEach(schedule => {
-                        if (schedule.date === fullDate) {
-                            const isHighlighted = highlightedSchedules.some(hs => hs.id === schedule.id);
-                            const scheduleElement = createScheduleElement(schedule, isHighlighted);
-                            cell.appendChild(scheduleElement);
+                    // 해당 날짜의 공지 표시
+                    noticesToRender.forEach(notice => {
+                        if (notice.date === fullDate) {
+                            const isHighlighted = highlightedNotices.some(hn => hn.id === notice.id);
+                            const noticeElement = createNoticeElement(notice, isHighlighted);
+                            cell.appendChild(noticeElement);
                         }
                     });
                     day++;
@@ -174,38 +175,37 @@ document.addEventListener('DOMContentLoaded', () => {
         calendarContainer.appendChild(table);
     }
 
-    // 일정 목록을 테이블 형태로 렌더링하고 표시
-    function renderScheduleList(schedulesToRender, highlightedSchedules = []) {
-        if (!scheduleListContainer) {
-            console.error('필수 DOM 요소(scheduleListContainer)가 없어 일정 목록을 렌더링할 수 없습니다.');
+    function renderNoticeList(noticesToRender, highlightedNotices = []) {
+        if (!noticeListContainer) {
+            console.error('필수 DOM 요소(noticeListContainer)가 없어 공지 목록을 렌더링할 수 없습니다.');
             return;
         }
         let listHtml = `<table class="table table-hover" style="font-size: 0.9rem;"><thead class="blue-header"><tr><th>날짜</th><th>분류</th><th>제목</th><th>중요도</th></tr></thead><tbody>`;
-        if (schedulesToRender.length === 0) {
+        if (noticesToRender.length === 0) {
             listHtml += '<tr><td colspan="4" class="text-center text-muted">해당하는 공지가 없습니다.</td></tr>';
         } else {
-            schedulesToRender.forEach(s => {
-                const isHighlighted = highlightedSchedules.length > 0 && highlightedSchedules.some(hs => hs.id === s.id);
-                const style = isHighlighted ? `style="background-color: ${s.color}; color: white;"` : '';
-                const date = new Date(s.date);
+            noticesToRender.forEach(n => {
+                const isHighlighted = highlightedNotices.length > 0 && highlightedNotices.some(hn => hn.id === n.id);
+                const style = isHighlighted ? `style="background-color: ${n.color}; color: white;"` : '';
+                const date = new Date(n.date);
                 const formattedDate = `${String(date.getFullYear()).substring(2)}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
-                listHtml += `<tr data-id="${s.id}" style="cursor: pointer;"><td>${formattedDate}</td><td>${s.category || '미지정'}</td><td>${s.title}</td><td>${s.priority || '보통'}</td></tr>`;
+                listHtml += `<tr data-id="${n.id}" style="cursor: pointer;"><td>${formattedDate}</td><td>${n.category || '미지정'}</td><td>${n.title}</td><td>${n.priority || '보통'}</td></tr>`;
             });
         }
         listHtml += '</tbody></table>';
-        scheduleListContainer.innerHTML = listHtml;
+        noticeListContainer.innerHTML = listHtml;
     }
 
-    // 현재 월의 달력과 일정 목록을 모두 렌더링
+    // 현재 월의 달력과 공지 목록을 모두 렌더링
     function renderAll() {
-        let currentMonthSchedules = allSchedules.filter(s =>
-            new Date(s.date).getFullYear() === currentDate.getFullYear() &&
-            new Date(s.date).getMonth() === currentDate.getMonth()
+        let currentMonthNotices = allNotices.filter(n =>
+            new Date(n.date).getFullYear() === currentDate.getFullYear() &&
+            new Date(n.date).getMonth() === currentDate.getMonth()
         );
 
         // [수정] 공지 목록 날짜 내림차순 -> 중요도 내림차순으로 정렬 - 사용자 편의성
         const priorityOrder = { '높음': 3, '보통': 2, '낮음': 1 };
-        currentMonthSchedules.sort((a, b) => {
+        currentMonthNotices.sort((a, b) => {
             const dateA = new Date(a.date);
             const dateB = new Date(b.date);
 
@@ -218,11 +218,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return priorityB - priorityA;
         });
 
-        renderCalendar(currentDate, currentMonthSchedules);
-        renderScheduleList(currentMonthSchedules);
+        renderCalendar(currentDate, currentMonthNotices);
+        renderNoticeList(currentMonthNotices);
     }
 
-    // 검색 조건에 따라 일정을 필터링하고 화면을 다시 렌더링
+    // 검색 조건에 따라 공지를 필터링하고 화면을 다시 렌더링
     function handleSearch() {
         if (!searchCategorySelect || !searchPrioritySelect || !searchKeywordInput) {
             console.error('필수 DOM 요소(searchCategorySelect, searchPrioritySelect, searchKeywordInput)가 없어 검색 기능을 수행할 수 없습니다.');
@@ -232,9 +232,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const priority = searchPrioritySelect.value;
         const keyword = searchKeywordInput.value.toLowerCase();
 
-        const currentMonthSchedules = allSchedules.filter(s =>
-            new Date(s.date).getFullYear() === currentDate.getFullYear() &&
-            new Date(s.date).getMonth() === currentDate.getMonth()
+        const currentMonthNotices = allNotices.filter(n =>
+            new Date(n.date).getFullYear() === currentDate.getFullYear() &&
+            new Date(n.date).getMonth() === currentDate.getMonth()
         );
 
         const isSearching = category || priority || keyword;
@@ -244,127 +244,127 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // 검색 조건에 맞는 일정 필터링
-        const filteredSchedules = currentMonthSchedules.filter(s => {
-            const categoryMatch = !category || (s.category || '미지정') === category;
-            const priorityMatch = !priority || (s.priority || '보통') === priority;
-            const keywordMatch = !keyword || s.title.toLowerCase().includes(keyword) || (s.content && s.content.toLowerCase().includes(keyword));
+        // 검색 조건에 맞는 공지 필터링
+        const filteredNotices = currentMonthNotices.filter(n => {
+            const categoryMatch = !category || (n.category || '미지정') === category;
+            const priorityMatch = !priority || (n.priority || '보통') === priority;
+            const keywordMatch = !keyword || n.title.toLowerCase().includes(keyword) || (n.content && n.content.toLowerCase().includes(keyword));
             return categoryMatch && priorityMatch && keywordMatch;
         });
 
-        renderCalendar(currentDate, currentMonthSchedules, filteredSchedules);
-        renderScheduleList(filteredSchedules);
+        renderCalendar(currentDate, currentMonthNotices, filteredNotices);
+        renderNoticeList(filteredNotices);
     }
 
-    // 일정 추가 모달 열기
+    // 공지 추가 모달 열기
     function openAddModal(date) {
-        if (!scheduleForm || !scheduleDateInput || !addModalInstance || !addModalEl || !scheduleTitleInput) {
-            console.error('필수 DOM 요소(scheduleForm, scheduleDateInput, addModalInstance, addModalEl, scheduleTitleInput)가 없어 일정 추가 모달을 열 수 없습니다.');
+        if (!noticeForm || !noticeDateInput || !addModalInstance || !addModalEl || !noticeTitleInput) {
+            console.error('필수 DOM 요소(noticeForm, noticeDateInput, addModalInstance, addModalEl, noticeTitleInput)가 없어 공지 추가 모달을 열 수 없습니다.');
             return;
         }
-        scheduleForm.reset();
-        scheduleDateInput.value = date;
+        noticeForm.reset();
+        noticeDateInput.value = date;
         addModalInstance.show();
-        addModalEl.addEventListener('shown.bs.modal', () => scheduleTitleInput.focus());
+        addModalEl.addEventListener('shown.bs.modal', () => noticeTitleInput.focus());
     }
 
-    // 일정 추가 모달 닫기
+    // 공지 추가 모달 닫기
     function closeAddModal() {
-        if (!scheduleForm || !addModalInstance) {
-            console.error('필수 DOM 요소(scheduleForm, addModalInstance)가 없어 일정 추가 모달을 닫을 수 없습니다.');
+        if (!noticeForm || !addModalInstance) {
+            console.error('필수 DOM 요소(noticeForm, addModalInstance)가 없어 공지 추가 모달을 닫을 수 없습니다.');
             return;
         }
-        scheduleForm.reset();
+        noticeForm.reset();
         addModalInstance.hide();
     }
 
-    // 새 일정을 추가하고 로컬 스토리지에 저장
-    function addSchedule(e) {
+    // 새 공지를 추가하고 로컬 스토리지에 저장
+    function addNotice(e) {
         e.preventDefault();
-        if (!scheduleCategoryInput || !scheduleDateInput || !scheduleTitleInput || !scheduleContentInput || !schedulePrioritySelect) {
-            console.error('필수 DOM 요소(scheduleCategoryInput, scheduleDateInput, scheduleTitleInput, scheduleContentInput, schedulePrioritySelect)가 없어 일정을 추가할 수 없습니다.');
+        if (!noticeCategoryInput || !noticeDateInput || !noticeTitleInput || !noticeContentInput || !noticePrioritySelect) {
+            console.error('필수 DOM 요소(noticeCategoryInput, noticeDateInput, noticeTitleInput, noticeContentInput, noticePrioritySelect)가 없어 공지를 추가할 수 없습니다.');
             return;
         }
-        if (!scheduleCategoryInput.value) {
+        if (!noticeCategoryInput.value) {
             alert('분류를 선택해주세요.');
             return;
         }
-        const newSchedule = {
+        const newNotice = {
             id: Date.now(),
-            date: scheduleDateInput.value,
-            title: scheduleTitleInput.value,
-            content: scheduleContentInput.value,
-            category: scheduleCategoryInput.value,
-            priority: schedulePrioritySelect.value,
+            date: noticeDateInput.value,
+            title: noticeTitleInput.value,
+            content: noticeContentInput.value,
+            category: noticeCategoryInput.value,
+            priority: noticePrioritySelect.value,
             site: '사용자 추가',
             color: '#6c757d'
         };
-        allSchedules.push(newSchedule);
-        localStorage.setItem(getCalendarKey(), JSON.stringify(allSchedules));
+        allNotices.push(newNotice);
+        localStorage.setItem(getCalendarKey(), JSON.stringify(allNotices));
         closeAddModal();
         renderAll();
     }
 
-    // 일정 상세/수정 모달 열기
+    // 공지 상세/수정 모달 열기
     function openDetailsModal(id) {
         if (!detailsIdInput || !detailsEditDateInput || !detailsEditTitleInput || !detailsEditContentInput || !detailsEditCategorySelect || !detailsEditPrioritySelect || !detailsModalInstance) {
-            console.error('필수 DOM 요소(detailsIdInput, detailsEditDateInput, detailsEditTitleInput, detailsEditContentInput, detailsEditCategorySelect, detailsEditPrioritySelect, detailsModalInstance)가 없어 일정 상세/수정 모달을 열 수 없습니다.');
+            console.error('필수 DOM 요소(detailsIdInput, detailsEditDateInput, detailsEditTitleInput, detailsEditContentInput, detailsEditCategorySelect, detailsEditPrioritySelect, detailsModalInstance)가 없어 공지 상세/수정 모달을 열 수 없습니다.');
             return;
         }
 
-        const schedule = allSchedules.find(s => s.id === id);
-        if (schedule) {
-            currentScheduleId = id;
-            detailsIdInput.value = schedule.id;
-            detailsEditDateInput.value = schedule.date;
-            detailsEditTitleInput.value = schedule.title;
-            detailsEditContentInput.value = schedule.content || '';
-            detailsEditCategorySelect.value = schedule.category || '';
-            detailsEditPrioritySelect.value = schedule.priority || '보통';
+        const notice = allNotices.find(n => n.id === id);
+        if (notice) {
+            currentNoticeId = id;
+            detailsIdInput.value = notice.id;
+            detailsEditDateInput.value = notice.date;
+            detailsEditTitleInput.value = notice.title;
+            detailsEditContentInput.value = notice.content || '';
+            detailsEditCategorySelect.value = notice.category || '';
+            detailsEditPrioritySelect.value = notice.priority || '보통';
             detailsModalInstance.show();
         }
     }
 
-    // 일정 상세/수정 모달 닫기
+    // 공지 상세/수정 모달 닫기
     function closeDetailsModal() {
         if (!detailsModalInstance) {
-            console.error('필수 DOM 요소(detailsModalInstance)가 없어 일정 상세/수정 모달을 닫을 수 없습니다.');
+            console.error('필수 DOM 요소(detailsModalInstance)가 없어 공지 상세/수정 모달을 닫을 수 없습니다.');
             return;
         }
         detailsModalInstance.hide();
     }
 
-    // 기존 일정 업데이트하고 로컬 스토리지에 저장
-    function updateSchedule() {
+    // 기존 공지 업데이트하고 로컬 스토리지에 저장
+    function updateNotice() {
         if (!detailsEditCategorySelect || !detailsEditDateInput || !detailsEditTitleInput || !detailsEditContentInput || !detailsEditPrioritySelect) {
-            console.error('필수 DOM 요소(detailsEditCategorySelect, detailsEditDateInput, detailsEditTitleInput, detailsEditContentInput, detailsEditPrioritySelect)가 없어 일정을 업데이트할 수 없습니다.');
+            console.error('필수 DOM 요소(detailsEditCategorySelect, detailsEditDateInput, detailsEditTitleInput, detailsEditContentInput, detailsEditPrioritySelect)가 없어 공지를 업데이트할 수 없습니다.');
             return;
         }
         if (!detailsEditCategorySelect.value) {
             alert('분류를 선택해주세요.');
             return;
         }
-        const scheduleIndex = allSchedules.findIndex(s => s.id === currentScheduleId);
-        if (scheduleIndex > -1) {
-            allSchedules[scheduleIndex] = {
-                ...allSchedules[scheduleIndex],
+        const noticeIndex = allNotices.findIndex(n => n.id === currentNoticeId);
+        if (noticeIndex > -1) {
+            allNotices[noticeIndex] = {
+                ...allNotices[noticeIndex],
                 date: detailsEditDateInput.value,
                 title: detailsEditTitleInput.value,
                 content: detailsEditContentInput.value,
                 category: detailsEditCategorySelect.value,
                 priority: detailsEditPrioritySelect.value
             };
-            localStorage.setItem(getCalendarKey(), JSON.stringify(allSchedules));
+            localStorage.setItem(getCalendarKey(), JSON.stringify(allNotices));
             closeDetailsModal();
             renderAll();
         }
     }
 
-    // 일정을 삭제하고 로컬 스토리지에 저장
-    function deleteSchedule() {
+    // 공지를 삭제하고 로컬 스토리지에 저장
+    function deleteNotice() {
         if (confirm('정말로 이 공지를 삭제하시겠습니까?')) {
-            allSchedules = allSchedules.filter(s => s.id !== currentScheduleId);
-            localStorage.setItem(getCalendarKey(), JSON.stringify(allSchedules));
+            allNotices = allNotices.filter(n => n.id !== currentNoticeId);
+            localStorage.setItem(getCalendarKey(), JSON.stringify(allNotices));
             closeDetailsModal();
             renderAll();
         }
@@ -383,29 +383,29 @@ document.addEventListener('DOMContentLoaded', () => {
     if (searchKeywordInput) searchKeywordInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') handleSearch(); });
 
     if (calendarContainer) calendarContainer.addEventListener('click', (e) => {
-        const scheduleItem = e.target.closest('.schedule-item');
+        const noticeItem = e.target.closest('.notice-item');
         const cell = e.target.closest('td[data-date]');
-        if (scheduleItem) {
+        if (noticeItem) {
             e.stopPropagation();
-            const scheduleId = Number(scheduleItem.dataset.id);
-            openDetailsModal(scheduleId);
+            const noticeId = Number(noticeItem.dataset.id);
+            openDetailsModal(noticeId);
         } else if (cell && !cell.classList.contains('other-month')) {
             openAddModal(cell.dataset.date);
         }
     });
 
-    if (scheduleListContainer) scheduleListContainer.addEventListener('click', (e) => {
+    if (noticeListContainer) noticeListContainer.addEventListener('click', (e) => {
         const row = e.target.closest('tr[data-id]');
         if (row) {
-            const scheduleId = Number(row.dataset.id);
-            openDetailsModal(scheduleId);
+            const noticeId = Number(row.dataset.id);
+            openDetailsModal(noticeId);
         }
     });
 
-    if (scheduleForm) scheduleForm.addEventListener('submit', addSchedule);
+    if (noticeForm) noticeForm.addEventListener('submit', addNotice);
     if (cancelAddModalBtn) cancelAddModalBtn.addEventListener('click', closeAddModal);
-    if (deleteScheduleBtn) deleteScheduleBtn.addEventListener('click', deleteSchedule);
-    if (updateScheduleBtn) updateScheduleBtn.addEventListener('click', updateSchedule);
+    if (deleteNoticeBtn) deleteNoticeBtn.addEventListener('click', deleteNotice);
+    if (updateNoticeBtn) updateNoticeBtn.addEventListener('click', updateNotice);
     if (cancelEditBtn) cancelEditBtn.addEventListener('click', closeDetailsModal);
 
     window.addEventListener('storage', (e) => {
@@ -418,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function initialize() {
-        // 저장된 모든 일정을 불러오고 화면 구성
+        // 저장된 모든 공지를 불러오고 화면 구성
         allSchedules = await fetchAnnouncements();
         populateCategoryDropdowns();
 

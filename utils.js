@@ -2,7 +2,7 @@
 //현재 사용자의 localStorage 키 생성
 function getCalendarKey() {
     const userId = localStorage.getItem('current_user_id');
-    return `calendar_schedules_${userId || 'guest'}`;
+    return `calendar_notices_${userId || 'guest'}`;
 }
 
 function getCategoriesKey() {

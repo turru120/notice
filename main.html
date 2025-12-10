@@ -89,7 +89,7 @@
                     </div>
                 </div>
                 <h5>이번 달 공지 목록</h5>
-                <div id="schedule-list-container">
+                <div id="notice-list-container">
                 </div>
             </div>
 
@@ -100,29 +100,29 @@
         </footer>
     </div>
 
-    <div class="modal fade" id="schedule-modal" tabindex="-1">
+    <div class="modal fade" id="notice-modal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">공지 추가</h5>
                 </div>
                 <div class="modal-body">
-                    <form id="schedule-form">
+                    <form id="notice-form">
                         <div class="mb-3">
                             <label for="schedule-date" class="form-label">날짜</label>
-                            <input type="text" id="schedule-date" class="form-control" readonly>
+                            <input type="text" id="notice-date" class="form-control" readonly>
                         </div>
                         <div class="mb-3">
                             <label for="schedule-title" class="form-label">제목</label>
-                            <input type="text" id="schedule-title" class="form-control" required>
+                            <input type="text" id="notice-title" class="form-control" required>
                         </div>
                         <div class="mb-3">
                             <label for="schedule-content" class="form-label">내용</label>
-                            <textarea id="schedule-content" class="form-control" rows="3"></textarea>
+                            <textarea id="notice-content" class="form-control" rows="3"></textarea>
                         </div>
                         <div class="mb-3">
                             <label for="schedule-category" class="form-label">분류</label>
-                            <select id="schedule-category" class="form-select" required>
+                            <select id="notice-category" class="form-select" required>
                                 <option value="수업">수업</option>
                                 <option value="장학">장학</option>
                                 <option value="행사">행사</option>
@@ -131,7 +131,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="schedule-priority" class="form-label">중요도</label>
-                            <select id="schedule-priority" class="form-select" required>
+                            <select id="notice-priority" class="form-select" required>
                                 <option value="낮음">낮음</option>
                                 <option value="보통" selected>보통</option>
                                 <option value="높음">높음</option>
@@ -188,11 +188,11 @@
                     </div>
                 </div>
                 <div class="modal-footer justify-content-between">
-                    <button type="button" id="delete-schedule-btn" class="btn btn-danger">삭제</button>
+                    <button type="button" id="delete-notice-btn" class="btn btn-danger">삭제</button>
                     <div>
                         <button type="button" id="cancel-edit-btn" class="btn btn-secondary"
                             data-bs-dismiss="modal">취소</button>
-                        <button type="button" id="update-schedule-btn" class="btn btn-primary">수정 완료</button>
+                        <button type="button" id="update-notice-btn" class="btn btn-primary">수정 완료</button>
                     </div>
                 </div>
             </div>
