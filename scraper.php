@@ -1,9 +1,5 @@
 <?php
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 $log_file = 'scraper.log';
 $user_file = 'user.json';
 $notices_file = 'notices.json';
@@ -206,12 +202,10 @@ try {
         throw new Exception('Failed to write to new_notices.json.');
     }
 
-    echo "Successfully scraped and updated. Found " . count($newly_added_notices) . " new notices.";
 
 
 } catch (Exception $e) {
-    write_log("An error occurred: " . $e->getMessage());
-    echo "An error occurred: " . $e->getMessage();
+    write_log("An error occurred: " . $e->getMessage());    
 }
 
 write_log("======== Scraper-Job-End ========\n");
