@@ -52,11 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             renderTable();
         } catch (error) {
-            if (tableBody) {
-                tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">사이트 목록을 불러오는데 실패했습니다.</td></tr>`;
-            } else {
-                console.error('필수 DOM 요소(tableBody)가 없어 사이트 목록 로딩 실패 메시지를 표시할 수 없습니다.', error);
-            }
+            tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">사이트 목록을 불러오는데 실패했습니다.</td></tr>`;
         }
     }
 
@@ -95,7 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.json();
             if (!result.success) {
-                throw new Error(result.message || 'Failed to save sites.');
+                alert(result.message || '사이트 저장에 실패했습니다.');
+                return;
             }
             await loadSites();
             if (window.renderNavbar) {
@@ -132,16 +129,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
         } catch (error) {
-            alert('사이트 목록 저장에 실패했습니다.');
+            alert(`사이트 목록 저장에 실패했습니다: ${error.message}`);
         }
     }
 
     // 현재 사이트 목록을 테이블 형태로 렌더링
     function renderTable() {
-        if (!tableBody) {
-            console.error('필수 DOM 요소(tableBody)가 없어 테이블을 렌더링할 수 없습니다.');
-            return;
-        }
         tableBody.innerHTML = '';
         sites.forEach(site => {
             const row = document.createElement('tr');
@@ -175,9 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tableBody.appendChild(row);
         });
 
-        if (actionsHeader) {
-            actionsHeader.style.display = isEditMode ? 'table-cell' : 'none';
-        }
+        actionsHeader.style.display = isEditMode ? 'table-cell' : 'none';
     }
 
     // 편집 모드를 토글하고 변경 사항 저장

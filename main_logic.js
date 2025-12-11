@@ -280,7 +280,6 @@ document.addEventListener('DOMContentLoaded', () => {
         noticeForm.reset();
         noticeDateInput.value = date;
         addModalInstance.show();
-        addModalEl.addEventListener('shown.bs.modal', () => noticeTitleInput.focus());
     }
 
     // 공지 추가 모달 닫기
@@ -359,7 +358,8 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('분류를 선택해주세요.');
             return;
         }
-        const noticeIndex = allNotices.findIndex(n => n.id === currentNoticeId);
+        const noticeToUpdateId = Number(detailsIdInput.value);
+        const noticeIndex = allNotices.findIndex(n => n.id === noticeToUpdateId);
         if (noticeIndex > -1) {
             allNotices[noticeIndex] = {
                 ...allNotices[noticeIndex],
@@ -378,7 +378,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 공지를 삭제하고 로컬 스토리지에 저장
     function deleteNotice() {
         if (confirm('정말로 이 공지를 삭제하시겠습니까?')) {
-            allNotices = allNotices.filter(n => n.id !== currentNoticeId);
+            const noticeToDeleteId = Number(detailsIdInput.value);
+            allNotices = allNotices.filter(n => n.id !== noticeToDeleteId);
             localStorage.setItem(getCalendarKey(), JSON.stringify(allNotices));
             closeDetailsModal();
             renderAll();
@@ -422,6 +423,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (deleteNoticeBtn) deleteNoticeBtn.addEventListener('click', deleteNotice);
     if (updateNoticeBtn) updateNoticeBtn.addEventListener('click', updateNotice);
     if (cancelEditBtn) cancelEditBtn.addEventListener('click', closeDetailsModal);
+
+    if (addModalEl) {
+        addModalEl.addEventListener('shown.bs.modal', () => noticeTitleInput.focus());
+    }
 
     window.addEventListener('storage', (e) => {
         if (e.key === getCategoriesKey()) {
