@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // [수정] 사이트 색상 변경 시 달력의 일정 색상도 즉시 업데이트 - 디자인 일관성 유지
             const newColorMap = new Map(sites.map(site => [site.name, site.color]));
 
-            const calendarKey = `calendar_schedules_${userId || 'guest'}`;
+            const calendarKey = getCalendarKey();
             const storedSchedules = localStorage.getItem(calendarKey);
             let allSchedules;
             try {
