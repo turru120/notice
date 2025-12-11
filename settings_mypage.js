@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // [LA 요구사항 (6) 만족] Drag and Drop + Ajax를 위한 사용자 데이터 및 카테고리 정보
     let currentUserData = {};
     let categories = [];
+    let isSitesEditMode = false;
+    let isEmailEditMode = false;
 
     // 사용자 데이터를 서버에서 불러와 화면에 표시
     async function loadUserData() {
