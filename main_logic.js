@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 달력을 렌더링하고 해당 월의 공지를 표시
-    function renderCalendar(date, noticesToRender, highlightedNotices = []) {
+    function renderCalendar(date, noticesToRender, searchResultsToHighlight = []) {
         if (!yearInput || !monthInput || !calendarContainer) {
             console.error('필수 DOM 요소(yearInput, monthInput, calendarContainer)가 없어 달력을 렌더링할 수 없습니다.');
             return;
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // 해당 날짜의 공지 표시
                     noticesToRender.forEach(notice => {
                         if (notice.date === fullDate) {
-                            const isHighlighted = highlightedNotices.some(hn => hn.id === notice.id);
+                            const isHighlighted = searchResultsToHighlight.some(hn => hn.id === notice.id);
                             const noticeElement = createNoticeElement(notice, isHighlighted);
                             cell.appendChild(noticeElement);
                         }
