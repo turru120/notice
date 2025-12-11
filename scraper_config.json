@@ -23,22 +23,16 @@
         "title_selector": ".\/\/td[2]\/a",
         "date_selector": ".\/\/td[4]"
     },
-    "경제학과": {
+    "드림스폰": {
         "encoding": "UTF-8",
-        "list_selector": "div.al_box",
-        "title_selector": "a",
-        "date_selector": "span.b-date"
+        "list_selector": "\/\/div[@class='bo_table']\/table\/tbody\/tr",
+        "title_selector": ".\/\/td[@class='td_subject']\/p[@class='title']\/a",
+        "date_selector": ".\/\/td[@class='td_day']"
     },
     "채용": {
         "encoding": "UTF-8",
-        "list_selector": "tbody",
-        "title_selector": "a",
-        "date_selector": "td.date"
-    },
-    "드림스폰": {
-        "encoding": "UTF-8",
-        "list_selector": "//div[@class='bo_table']/table/tbody/tr",
-        "title_selector": ".//td[@class='td_subject']/p[@class='title']/a",
-        "date_selector": ".//td[@class='td_day']"
+        "list_selector": "\/\/tbody\/tr",
+        "title_selector": ".\/\/td[2]\/a",
+        "date_selector": ".\/\/td[4]"
     }
 }
