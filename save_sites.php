@@ -90,16 +90,8 @@ try {
         }
     }
 
-    // 스크래퍼 설정 파일 업데이트
+    // 스크래퍼 설정 파일 업데이트: new_sites에 있는 사이트만으로 스크래퍼 설정을 완전히 재구성
     $scraper_configs = [];
-    if (file_exists($scraper_config_file)) {
-        $scraper_configs = json_decode(file_get_contents($scraper_config_file), true);
-        if (!is_array($scraper_configs)) {
-            $scraper_configs = [];
-        }
-    }
-
-    // 새 사이트 정보로 스크래퍼 설정 업데이트
     foreach ($new_sites as $site) {
         if (!empty($site['site_name']) && !empty($site['notice_list_selector'])) {
             $scraper_configs[$site['site_name']] = [
@@ -123,6 +115,20 @@ try {
             pclose(popen("start /B " . $command, "r"));
         } else {
             error_log('scraper.php not found for immediate execution.');
+        }
+    }
+
+    // notices.json에서 삭제된 사이트의 공지사항 제거
+    if (file_exists($notices_file)) {
+        $notices_data = json_decode(file_get_contents($notices_file), true);
+        if ($notices_data) {
+            $current_site_names = array_column($new_sites, 'site_name');
+            $filtered_notices = array_filter($notices_data, function ($notice) use ($current_site_names) {
+                return in_array($notice['site'], $current_site_names);
+            });
+            if (count($filtered_notices) !== count($notices_data)) {
+                file_put_contents($notices_file, json_encode(array_values($filtered_notices), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            }
         }
     }
 
