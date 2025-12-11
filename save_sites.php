@@ -90,21 +90,25 @@ try {
         }
     }
 
-    // 스크래퍼 설정 파일 업데이트: new_sites에 있는 사이트만으로 스크래퍼 설정을 완전히 재구성
-    $scraper_configs = [];
-    foreach ($new_sites as $site) {
-        if (!empty($site['site_name']) && !empty($site['notice_list_selector'])) {
-            $scraper_configs[$site['site_name']] = [
-                'encoding' => 'UTF-8',
-                'list_selector' => $site['notice_list_selector'],
-                'title_selector' => $site['notice_title_selector'],
-                'date_selector' => $site['notice_date_selector']
-            ];
+    // 전체 사용자로부터 스크래퍼 설정 수집    
+    $all_scraper_configs = [];
+    foreach ($users_data as $user_info) {
+        if (isset($user_info['registered_sites']) && is_array($user_info['registered_sites'])) {
+            foreach ($user_info['registered_sites'] as $site) {
+                if (!empty($site['site_name']) && !empty($site['notice_list_selector'])) {
+                    $all_scraper_configs[$site['site_name']] = [
+                        'encoding' => 'UTF-8',
+                        'list_selector' => $site['notice_list_selector'],
+                        'title_selector' => $site['notice_title_selector'],
+                        'date_selector' => $site['notice_date_selector']
+                    ];
+                }
+            }
         }
     }
 
     // 업데이트된 스크래퍼 설정을 파일에 저장
-    if (file_put_contents($scraper_config_file, json_encode($scraper_configs, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) === false) {
+    if (file_put_contents($scraper_config_file, json_encode($all_scraper_configs, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) === false) {
         error_log('Failed to update scraper_config.json.');
     } else {
         $php_executable = 'C:\\php8\\php.exe';
@@ -122,9 +126,10 @@ try {
     if (file_exists($notices_file)) {
         $notices_data = json_decode(file_get_contents($notices_file), true);
         if ($notices_data) {
-            $current_site_names = array_column($new_sites, 'site_name');
-            $filtered_notices = array_filter($notices_data, function ($notice) use ($current_site_names) {
-                return in_array($notice['site'], $current_site_names);
+            $all_site_names = array_keys($all_scraper_configs);
+            $filtered_notices = array_filter($notices_data, function ($notice) use ($all_site_names) {
+                // 공지사항의 사이트가 전체 사이트 목록에 있는 경우에만 유지
+                return in_array($notice['site'], $all_site_names);
             });
             if (count($filtered_notices) !== count($notices_data)) {
                 file_put_contents($notices_file, json_encode(array_values($filtered_notices), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));

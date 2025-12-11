@@ -46,7 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     notice_title_selector: site.notice_title_selector || '',
                     notice_date_selector: site.notice_date_selector || '',
                     isFavorite: site.isFavorite !== undefined ? site.isFavorite : false,
-                    color: site.color || defaultColors[index % defaultColors.length]
+                    color: site.color || defaultColors[index % defaultColors.length],
+                    receiveNotification: site.receiveNotification
                 };
             });
             renderTable();
@@ -75,7 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
             notice_date_selector: site.notice_date_selector,
             isFavorite: site.isFavorite,
             color: site.color,
-            id: site.id
+            id: site.id,
+            receiveNotification: site.receiveNotification
         }));
 
         try {
