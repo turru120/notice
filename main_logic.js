@@ -419,10 +419,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (noticeForm) noticeForm.addEventListener('submit', addNotice);
-    if (cancelAddModalBtn) cancelAddModalBtn.addEventListener('click', closeAddModal);
     if (deleteNoticeBtn) deleteNoticeBtn.addEventListener('click', deleteNotice);
     if (updateNoticeBtn) updateNoticeBtn.addEventListener('click', updateNotice);
-    if (cancelEditBtn) cancelEditBtn.addEventListener('click', closeDetailsModal);
 
     if (addModalEl) {
         addModalEl.addEventListener('shown.bs.modal', () => noticeTitleInput.focus());
