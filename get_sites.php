@@ -2,7 +2,9 @@
 header('Content-Type: application/json');
 $user_file = 'user.json';
 if (!isset($_GET['user_id']) || empty($_GET['user_id'])) {
-    throw new Exception('User ID is required.');
+    http_response_code(400); // Bad Request
+    echo json_encode(['error' => 'User ID is required.']);
+    exit;
 }
 //현재 요청된 user_id 가져오기
 $current_user_id = $_GET['user_id'];

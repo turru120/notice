@@ -7,9 +7,6 @@ require 'vendor/autoload.php';
 // 이메일 전송 설정을 포함하는 설정 파일
 $config = require 'config.php';
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
 $log_file = 'scraper.log';
 $user_file = 'user.json';
 $new_notices_file = 'new_notices.json';
@@ -20,6 +17,8 @@ function write_log($message)
     $timestamp = date('Y-m-d H:i:s');
     file_put_contents($log_file, "[" . $timestamp . "] [Notifier] " . $message . "\n", FILE_APPEND);
 }
+
+try {
 
 write_log("Notification script started.");
 
@@ -141,6 +140,10 @@ foreach ($users as $user) {
 // 모든 이메일 발송 후 new_notices.json  초기화
 file_put_contents($new_notices_file, json_encode([], JSON_PRETTY_PRINT));
 write_log("Cleared new_notices.json.");
+
+} catch (Exception $e) {
+    write_log("An unexpected error occurred: " . $e->getMessage());
+}
 
 write_log("======== Notification-Job-End ========\n");
 

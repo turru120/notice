@@ -53,7 +53,18 @@ try {
     echo json_encode(['success' => true, 'message' => 'Email updated successfully.']);
 
 } catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    $message = $e->getMessage();
+    $statusCode = 500; // Default to Internal Server Error
+
+    if (strpos($message, 'Invalid request method.') !== false ||
+        strpos($message, 'Email or User ID not provided.') !== false ||
+        strpos($message, 'Invalid email format.') !== false) {
+        $statusCode = 400; // Bad Request
+    } elseif (strpos($message, 'User not found.') !== false) {
+        $statusCode = 404; // Not Found
+    }
+
+    http_response_code($statusCode);
+    echo json_encode(['success' => false, 'message' => $message]);
 }
 ?>
