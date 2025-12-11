@@ -9,24 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const itemsPerPage = 10;
     let lastKnownTimestamp = 0;
 
-    // [추가] 1분마다 자동 업데이트할 수 있도록 함수 추가 - 사용자 편의성 증가
-    async function checkForUpdates() {
-        try {
-            const response = await fetch(`check_updates.php?t=${new Date().getTime()}`);
-            if (!response.ok) return;
-
-            const data = await response.json();
-            const serverTimestamp = data.last_modified;
-
-            // 서버에서 받은 최신 수정 시간이 현재 알고 있는 시간보다 최신이면 데이터 전체 갱신
-            if (serverTimestamp > 0 && serverTimestamp > lastKnownTimestamp) {
-                lastKnownTimestamp = serverTimestamp;
-                await initialize(true);
-            }
-        } catch (error) {
-            console.error('업데이트 확인 중 오류:', error);
-        }
-    }
 
     // 모든 공지사항을 비동기적으로 불러와 처리
     async function fetchAllAnnouncements() {

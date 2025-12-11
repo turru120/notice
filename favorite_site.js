@@ -1,13 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const siteTitleEl = document.getElementById('site-title');
     const announcementsListEl = document.getElementById('announcements-list');
-
-    let paginationContainer = document.getElementById('pagination-container');
-    if (!paginationContainer) {
-        paginationContainer = document.createElement('div');
-        paginationContainer.id = 'pagination-container';
-        announcementsListEl.parentNode.insertBefore(paginationContainer, announcementsListEl.nextSibling);
-    }
+    const paginationContainer = document.getElementById('pagination-container');
 
     let allAnnouncementsForSite = [];
     let currentPage = 1;
