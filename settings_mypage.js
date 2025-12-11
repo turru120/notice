@@ -11,9 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let allSites = [];
     let userEmail = '';
+    // [LA 요구사항 (6) 만족] Drag and Drop + Ajax를 위한 사용자 데이터 및 카테고리 정보
+    let currentUserData = {};
     let categories = [];
-    let isSitesEditMode = false;
-    let isEmailEditMode = false;
 
     // 사용자 데이터를 서버에서 불러와 화면에 표시
     async function loadUserData() {
@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const user = await response.json();
+            currentUserData = user;
 
             if (hasMypageUserNameDisplay) {
                 mypageUserName.innerHTML = `이름 : ${user.name || '사용자'}`;
@@ -47,21 +48,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 로컬 스토리지에서 카테고리 목록을 불러옴
+    // [보완] Ajax 연동 - LA 요구사항 만족
     function loadCategories() {
-        const storedCategories = localStorage.getItem(getCategoriesKey());
-        try {
-            categories = storedCategories ? JSON.parse(storedCategories) : ['수업', '장학', '행사', '기타']; // 기본 카테고리
-        } catch (e) {
-            console.error('로컬 스토리지의 카테고리 데이터 파싱 오류:', e);
-            localStorage.removeItem(getCategoriesKey());
-            categories = ['수업', '장학', '행사', '기타'];
-        }
+        categories = (currentUserData.categories && currentUserData.categories.length > 0)
+            ? currentUserData.categories
+            : ['수업', '장학', '행사', '기타']; // 기본 카테고리
     }
 
-    // 카테고리 목록을 로컬 스토리지에 저장
-    function saveCategories() {
-        localStorage.setItem(getCategoriesKey(), JSON.stringify(categories));
+    // 변경된 카테고리 목록 서버에 저장
+    async function saveCategories() {
+        const userId = localStorage.getItem('current_user_id');
+        if (!userId) {
+            alert('로그인 정보가 없습니다. 다시 로그인해주세요.');
+            return;
+        }
+
+        try {
+            const response = await fetch('save_categories.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: userId, categories: categories })
+            });
+            const result = await response.json();
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || '카테고리 저장에 실패했습니다.');
+            }
+        } catch (error) {
+            alert(`오류: ${error.message}`);
+            // 에러 발생 시 UI를 이전 상태로 되돌리기 위해 페이지를 새로고침하거나 상태를 다시 로드
+            await loadUserData();
+            loadCategories();
+            renderCategories();
+        }
     }
 
     // 카테고리 목록을 UI에 렌더링
@@ -161,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 새 카테고리 추가
-    function handleAddCategory() {
+    async function handleAddCategory() {
         if (!newCategoryInput) {
             console.error('필수 DOM 요소(newCategoryInput)가 없어 카테고리를 추가할 수 없습니다.');
             return;
@@ -169,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const newCategory = newCategoryInput.value.trim();
         if (newCategory && !categories.includes(newCategory)) {
             categories.push(newCategory);
-            saveCategories();
+            await saveCategories();
             renderCategories();
             newCategoryInput.value = '';
         } else if (categories.includes(newCategory)) {
@@ -177,13 +195,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 카테고리 삭제
-    function handleDeleteCategory(e) {
+    // 카테고리 삭제 시
+    async function handleDeleteCategory(e) {
         if (e.target.dataset.category) {
             const categoryToDelete = e.target.dataset.category;
             if (confirm(`'${categoryToDelete}' 분류를 삭제하시겠습니까?`)) {
                 categories = categories.filter(cat => cat !== categoryToDelete);
-                saveCategories();
+                await saveCategories();
                 renderCategories();
 
                 // [보완] 삭제된 분류를 사용하던 모든 일정의 분류를 리셋 - 사용자 편의성 향상
@@ -192,8 +210,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 let allSchedules;
                 try {
                     allSchedules = storedSchedules ? JSON.parse(storedSchedules) : [];
-                } catch (e) {
-                    console.error('로컬 스토리지의 일정 데이터 파싱 오류:', e);
+                } catch (parseError) {
+                    console.error('로컬 스토리지의 일정 데이터 파싱 오류:', parseError);
                     localStorage.removeItem(calendarKey);
                     allSchedules = [];
                 }
@@ -339,10 +357,11 @@ document.addEventListener('DOMContentLoaded', () => {
             new Sortable(categoryList, {
                 animation: 150,
                 handle: '.bi-grip-vertical',
-                onEnd: function (evt) {
+                // 카테고리 순서 변경 시 서버에 저장
+                onEnd: async function (evt) {
                     const newOrder = Array.from(evt.to.children).map(li => li.dataset.category);
                     categories = newOrder;
-                    saveCategories();
+                    await saveCategories();
                 }
             });
         }
