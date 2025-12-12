@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return allAnnouncements;
 
         } catch (error) {
-            feedContainer.innerHTML = `<p class="text-center text-danger">공지사항을 불러오는데 실패했습니다: ${error.message}</p>`; // 에러 메시지 표시
+            feedContainer.innerHTML = `<p class="text-center text-danger">공지사항을 불러오는데 실패했습니다: ${error.message}</p>`;
             return [];
         }
     }
