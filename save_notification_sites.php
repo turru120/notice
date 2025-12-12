@@ -57,16 +57,17 @@ try {
     echo json_encode(['success' => true, 'message' => 'Notification sites updated successfully.']);
 
 } catch (Exception $e) {
+    //[수정] 에러 코드 구분 - 에러 명확화
     $message = $e->getMessage();
-    $statusCode = 500; // Default to Internal Server Error
+    $statusCode = 500;
 
     if (strpos($message, 'Invalid request method.') !== false ||
         strpos($message, 'User ID or Site IDs not provided.') !== false ||
         strpos($message, 'Site IDs must be an array.') !== false) {
-        $statusCode = 400; // Bad Request
+        $statusCode = 400;
     } elseif (strpos($message, 'User data file not found.') !== false ||
               strpos($message, 'User not found.') !== false) {
-        $statusCode = 404; // Not Found
+        $statusCode = 404;
     }
 
     http_response_code($statusCode);
