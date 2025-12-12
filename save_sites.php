@@ -25,7 +25,54 @@ try {
         throw new Exception('User ID or sites data not provided.');
     }
     $current_user_id = $input_data['userId'];
-    $new_sites = $input_data['sites'];
+    $new_sites_raw = $input_data['sites'];
+
+    $unique_sites = [];
+    $normalized_urls_seen = [];
+
+    foreach ($new_sites_raw as $site) {
+        if (empty($site['site_url'])) {
+            continue;
+        }
+
+        // URL을 파싱하여 정규화
+        $url_parts = parse_url($site['site_url']);
+        if ($url_parts === false) {
+            continue; // Invalid URL, skip
+        }
+
+        // 쿼리 파라미터에서 불필요한 부분 제거
+        if (isset($url_parts['query'])) {
+            parse_str($url_parts['query'], $query_params);
+            unset($query_params['GotoPage']);
+            unset($query_params['skey']);
+            unset($query_params['sval']);
+            unset($query_params['ntt_tag']);
+            $url_parts['query'] = http_build_query($query_params);
+        }
+
+        // 정규화된 URL 재조립
+        $normalized_url = (isset($url_parts['scheme']) ? $url_parts['scheme'] . '://' : '') .
+                          (isset($url_parts['host']) ? $url_parts['host'] : '');
+        if (isset($url_parts['path'])) {
+            $normalized_url .= $url_parts['path'];
+        }
+        if (isset($url_parts['query']) && !empty($url_parts['query'])) {
+            $normalized_url .= '?' . $url_parts['query'];
+        }
+        // URL 끝에 '?'가 남는 경우 제거
+        if (substr($normalized_url, -1) === '?') {
+            $normalized_url = rtrim($normalized_url, '?');
+        }
+
+        if (!in_array($normalized_url, $normalized_urls_seen)) {
+            $normalized_urls_seen[] = $normalized_url;
+            // 정규화된 URL로 사이트 정보 업데이트 후 추가
+            $site['site_url'] = $normalized_url;
+            $unique_sites[] = $site;
+        }
+    }
+    $new_sites = $unique_sites;
 
     if (!file_exists($user_file)) {
         throw new Exception('User data file not found.');
@@ -94,18 +141,24 @@ try {
         }
     }
 
-    // 모든 사용자의 사이트 정보를 다시 읽어 scraper_config.json 재생성 
+    // 모든 사용자의 사이트 정보를 다시 읽어 scraper_config.json 재생성
     $all_scraper_configs = [];
+    $all_registered_site_names = [];
+
     foreach ($users_data as $user_info) {
         if (isset($user_info['registered_sites']) && is_array($user_info['registered_sites'])) {
             foreach ($user_info['registered_sites'] as $site) {
-                if (!empty($site['site_name']) && !empty($site['notice_list_selector'])) {
-                    $all_scraper_configs[$site['site_name']] = [
+                if (!empty($site['site_url']) && !empty($site['notice_list_selector'])) {
+                    $all_scraper_configs[$site['site_url']] = [
                         'encoding' => 'UTF-8',
                         'list_selector' => $site['notice_list_selector'],
                         'title_selector' => $site['notice_title_selector'],
                         'date_selector' => $site['notice_date_selector']
                     ];
+                    // 삭제된 사이트의 공지를 정리하기 위해 현재 사용 중인 모든 사이트 이름을 추적
+                    if (!in_array($site['site_name'], $all_registered_site_names)) {
+                        $all_registered_site_names[] = $site['site_name'];
+                    }
                 }
             }
         }
@@ -115,15 +168,15 @@ try {
     if (file_put_contents($scraper_config_file, json_encode($all_scraper_configs, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) === false) {
         error_log('Failed to update scraper_config.json.');
     } else {
-        // 스크래퍼 즉시 실행
+        // 워커 즉시 실행
         $php_executable = 'C:\\php8\\php.exe';
-        $scraper_script_path = __DIR__ . '\\scraper.php';
+        $worker_script_path = __DIR__ . '\\worker.php';
 
-        if (file_exists($scraper_script_path)) {
-            $command = escapeshellcmd($php_executable) . ' ' . escapeshellarg($scraper_script_path);
+        if (file_exists($worker_script_path)) {
+            $command = escapeshellcmd($php_executable) . ' ' . escapeshellarg($worker_script_path);
             pclose(popen("start /B " . $command, "r"));
         } else {
-            error_log('scraper.php not found for immediate execution.');
+            error_log('worker.php not found for immediate execution.');
         }
     }
 
@@ -131,10 +184,8 @@ try {
     if (file_exists($notices_file)) {
         $notices_data = json_decode(file_get_contents($notices_file), true);
         if ($notices_data) {
-            $all_site_names = array_keys($all_scraper_configs);
-            // 현재 존재하는 사이트 목록에 없는 공지사항은 필터링하여 제거
-            $filtered_notices = array_filter($notices_data, function ($notice) use ($all_site_names) {
-                return in_array($notice['site'], $all_site_names);
+            $filtered_notices = array_filter($notices_data, function ($notice) use ($all_registered_site_names) {
+                return in_array($notice['site'], $all_registered_site_names);
             });
             if (count($filtered_notices) !== count($notices_data)) {
                 file_put_contents($notices_file, json_encode(array_values($filtered_notices), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));

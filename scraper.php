@@ -111,11 +111,12 @@ try {
         $url = $site['site_url'];
         write_log("Scraping site: {$site_name} ({$url})");
 
-        if (!isset($scraper_configs[$site_name])) {
-            write_log("Warning: '{$site_name}' 사이트에 대한 스크레이퍼 설정이 없습니다. 건너뜁니다.");
+        // [수정] site_url을 키로 사용하여 스크레이퍼 설정 찾음
+        if (!isset($scraper_configs[$url])) {
+            write_log("Warning: '{$url}' 사이트에 대한 스크레이퍼 설정이 없습니다. 건너뜁니다.");
             continue;
         }
-        $config = $scraper_configs[$site_name];
+        $config = $scraper_configs[$url];
 
         // cURL을 사용하여 사이트의 HTML 내용을 가져옴
         $ch = curl_init();
