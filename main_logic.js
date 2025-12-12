@@ -267,6 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return priorityB - priorityA;
         });
 
+        // 필터링된 공지를 하이라이트 대상으로 지정하여 캘린더 재렌더링
         renderCalendar(currentDate, currentMonthNotices, filteredNotices);
         renderNoticeList(filteredNotices);
     }
