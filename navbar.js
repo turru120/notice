@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const userNameDisplay = document.getElementById('user-name-display');
         if (userNameDisplay) {
             const currentUser = localStorage.getItem('current_user_name');
-            userNameDisplay.textContent = currentUser || '사용자';
+            userNameDisplay.textContent = (currentUser ? currentUser + '님' : '사용자님');
         }
 
         const navbarLinksContainer = document.getElementById('navbar-links');

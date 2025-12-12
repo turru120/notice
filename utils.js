@@ -1,5 +1,5 @@
-//[보완] 겹치는 함수를 utils.js 파일로 이동 - 재사용성 향상
-//현재 사용자의 localStorage 키 생성
+// [보완] 겹치는 함수를 utils.js 파일로 이동 - 재사용성 향상
+// 현재 사용자의 localStorage 키 생성
 function getCalendarKey() {
     const userId = localStorage.getItem('current_user_id');
     return `calendar_notices_${userId || 'guest'}`;
@@ -10,7 +10,7 @@ function getCategoriesKey() {
     return `managed_categories_${userId || 'guest'}`;
 }
 
-//페이지네이션 UI 렌더링
+// 페이지네이션 UI 렌더링
 function renderPagination(container, totalItems, currentPage, itemsPerPage) {
     if (!container) {
         console.error("Pagination container is not defined.");
