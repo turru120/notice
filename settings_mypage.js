@@ -74,6 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok || !result.success) {
                 throw new Error(result.message || '카테고리 저장에 실패했습니다.');
             }
+            // 다른 탭/창에 변경사항을 알리기 위해 localStorage에 저장
+            localStorage.setItem(getCategoriesKey(), JSON.stringify(categories));
+
         } catch (error) {
             alert(`오류: ${error.message}`);
             // 에러 발생 시 UI를 이전 상태로 되돌리기 위해 페이지를 새로고침하거나 상태를 다시 로드
@@ -186,14 +189,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         const newCategory = newCategoryInput.value.trim();
-        if (newCategory && !categories.includes(newCategory)) {
-            categories.push(newCategory);
-            await saveCategories();
-            renderCategories();
-            newCategoryInput.value = '';
-        } else if (categories.includes(newCategory)) {
-            alert('이미 존재하는 분류입니다.');
+
+        if (!newCategory) {
+            alert('분류 이름은 비워둘 수 없습니다.');
+            return;
         }
+
+        if (categories.includes(newCategory)) {
+            alert('이미 존재하는 분류입니다.');
+            return;
+        }
+
+        categories.push(newCategory);
+        await saveCategories();
+        renderCategories();
+        newCategoryInput.value = '';
     }
 
     // 카테고리 삭제 시

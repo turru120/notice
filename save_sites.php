@@ -1,4 +1,6 @@
 <?php
+//사용자가 사이트 관리 페이지에서 수정한 사이트 목록을 저장하고 필요 시 스크래퍼 즉시 실행
+
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -7,17 +9,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// 설정 및 파일 경로
 $user_file = 'user.json';
 $notices_file = 'notices.json';
 $scraper_config_file = 'scraper_config.json';
 
 try {
+    // 입력 데이터 수신 및 유효성 검사
     $input_data = json_decode(file_get_contents('php://input'), true);
     if (json_last_error() !== JSON_ERROR_NONE) {
         throw new Exception('Invalid JSON received: ' . json_last_error_msg());
     }
 
-    // 필수 데이터 존재 여부 확인
     if (!isset($input_data['userId']) || !isset($input_data['sites'])) {
         throw new Exception('User ID or sites data not provided.');
     }
@@ -32,18 +35,19 @@ try {
         throw new Exception('Error decoding user JSON.');
     }
 
+    // 사용자 정보 업데이트 및 이름 변경 감지
     $user_found = false;
     $name_changes = [];
 
-    // 현재 사용자 정보 업데이트
     foreach ($users_data as &$user) {
         if ($user['id'] === $current_user_id) {
             $user_found = true;
 
+            // 사이트 이름 변경을 감지하여 나중에 notices.json을 업데이트할 때 사용
             $old_sites = isset($user['registered_sites']) ? $user['registered_sites'] : [];
             $old_sites_map = [];
             foreach ($old_sites as $old_site) {
-                if (isset($old_site['site_name'])) {
+                if (isset($old_site['site_url'])) {
                     $old_sites_map[$old_site['site_url']] = $old_site['site_name'];
                 }
             }
@@ -66,12 +70,12 @@ try {
         throw new Exception('User not found.');
     }
 
-    // 변경된 사용자 데이터를 JSON 파일에 저장
+    // 변경된 사용자 데이터를 user.json 파일에 저장
     if (file_put_contents($user_file, json_encode($users_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) === false) {
         throw new Exception('Failed to write to user data file.');
     }
 
-    // 사이트 이름 변경 & notices.json 파일 존재 -> 공지사항 업데이트
+    // 이름 변경 시 notices.json 업데이트
     if (!empty($name_changes) && file_exists($notices_file)) {
         $notices_data = json_decode(file_get_contents($notices_file), true);
         if ($notices_data) {
@@ -90,7 +94,7 @@ try {
         }
     }
 
-    // 전체 사용자로부터 스크래퍼 설정 수집    
+    // 모든 사용자의 사이트 정보를 다시 읽어 scraper_config.json 재생성 
     $all_scraper_configs = [];
     foreach ($users_data as $user_info) {
         if (isset($user_info['registered_sites']) && is_array($user_info['registered_sites'])) {
@@ -111,6 +115,7 @@ try {
     if (file_put_contents($scraper_config_file, json_encode($all_scraper_configs, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) === false) {
         error_log('Failed to update scraper_config.json.');
     } else {
+        // 스크래퍼 즉시 실행
         $php_executable = 'C:\\php8\\php.exe';
         $scraper_script_path = __DIR__ . '\\scraper.php';
 
@@ -122,13 +127,13 @@ try {
         }
     }
 
-    // notices.json에서 삭제된 사이트의 공지사항 제거
+    // [추가] 삭제된 사이트의 공지사항 정리 - 사용자 편의성 
     if (file_exists($notices_file)) {
         $notices_data = json_decode(file_get_contents($notices_file), true);
         if ($notices_data) {
             $all_site_names = array_keys($all_scraper_configs);
+            // 현재 존재하는 사이트 목록에 없는 공지사항은 필터링하여 제거
             $filtered_notices = array_filter($notices_data, function ($notice) use ($all_site_names) {
-                // 공지사항의 사이트가 전체 사이트 목록에 있는 경우에만 유지
                 return in_array($notice['site'], $all_site_names);
             });
             if (count($filtered_notices) !== count($notices_data)) {
