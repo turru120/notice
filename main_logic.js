@@ -1,10 +1,15 @@
+// 메인 페이지의 캘린더, 공지 목록, 검색, 공지 추가/수정/삭제 등 핵심 기능을 관리
+// 사용자의 모든 공지사항 데이터를 로컬 스토리지에서 관리하고 동적으로 UI 렌더링
+
+// [수정] 일정 -> 공지로 명칭 통일 - 사용자 혼동 방지
+
 document.addEventListener('DOMContentLoaded', () => {
-    // [수정] 일정 -> 공지로 명칭 통일 - 사용자 혼동 방지
+    // 전역 변수
     let allNotices = [];
     let currentDate = new Date();
     let currentNoticeId = null;
 
-    // DOM 요소 참조 (주요 UI 컴포넌트)
+    // 주요 UI 컴포넌트 DOM 요소
     const calendarContainer = document.getElementById('calendar-container');
     const noticeListContainer = document.getElementById('notice-list-container');
     const searchCategorySelect = document.getElementById('search-category');
@@ -15,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthInput = document.getElementById('month-input');
     const renderBtn = document.getElementById('render-calendar-btn');
 
-    // 공지 추가 모달 관련 요소
+    // 공지 추가 모달 관련 DOM 요소
     const addModalEl = document.getElementById('notice-modal');
     const addModalInstance = addModalEl ? new bootstrap.Modal(addModalEl) : null;
     const noticeForm = document.getElementById('notice-form');
@@ -26,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const noticePrioritySelect = document.getElementById('notice-priority');
     const cancelAddModalBtn = document.getElementById('cancel-modal-btn');
 
-    // 공지 상세/수정 모달 관련 요소
+    // 공지 상세/수정 모달 관련 DOM 요소
     const detailsModalEl = document.getElementById('details-modal');
     const detailsModalInstance = detailsModalEl ? new bootstrap.Modal(detailsModalEl) : null;
     const detailsIdInput = document.getElementById('details-id');
@@ -39,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelEditBtn = document.getElementById('cancel-edit-btn');
     const updateNoticeBtn = document.getElementById('update-notice-btn');
 
-    // 로컬 스토리지에서 공지 불러옴
+    // 로컬 스토리지에서 현재 사용자의 공지 목록 불러옴
     async function fetchAnnouncements() {
         const storedNotices = localStorage.getItem(getCalendarKey());
         try {
@@ -51,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 드롭다운에 카테고리 옵션 채움
+    // 로컬 스토리지에서 카테고리 목록을 가져와 드롭다운 메뉴 채움
     function populateCategoryDropdowns() {
         const storedCategories = localStorage.getItem(getCategoriesKey());
         let categories;
@@ -63,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
             categories = ['수업', '장학', '행사', '기타'];
         }
 
-        // 검색 카테고리 드롭다운 업데이트
+        // 검색 UI의 카테고리 드롭다운 업데이트
         if (searchCategorySelect) {
             searchCategorySelect.innerHTML = '<option value="">전체</option>';
             categories.forEach(cat => {
@@ -90,14 +95,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 공지 요소를 생성하여 반환
+    // 달력의 각 날짜 셀에 표시될 공지 DOM 요소 생성
     function createNoticeElement(notice, isHighlighted) {
         const noticeItem = document.createElement('div');
         noticeItem.className = 'notice-item';
         noticeItem.dataset.id = notice.id;
         noticeItem.textContent = notice.title;
 
-        // 하이라이트 여부
         if (isHighlighted) {
             noticeItem.style.backgroundColor = notice.color;
             noticeItem.style.color = 'white';
@@ -109,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return noticeItem;
     }
 
-    // 달력을 렌더링하고 해당 월의 공지를 표시
+    // 주어진 날짜에 해당하는 월의 달력을 그리고 공지사항 표시
     function renderCalendar(date, noticesToRender, searchResultsToHighlight = []) {
         if (!yearInput || !monthInput || !calendarContainer) {
             console.error('필수 DOM 요소(yearInput, monthInput, calendarContainer)가 없어 달력을 렌더링할 수 없습니다.');
@@ -140,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         let day = 1;
 
-        // 달력 날짜 채우기
+        //  달력 날짜 생성
         for (let i = 0; i < 6; i++) {
             const row = tbody.insertRow();
             for (let j = 0; j < 7; j++) {
@@ -151,6 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const fullDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                     const today = new Date();
                     cell.dataset.date = fullDate;
+                    // [보완] 오늘 날짜에 today 클래스 추가해 오늘 날짜 강조 - 디자인 개선
                     if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
                         cell.classList.add('today');
                     }
@@ -159,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     dayDiv.textContent = day;
                     cell.appendChild(dayDiv);
 
-                    // 해당 날짜의 공지 표시
+                    // 해당 날짜에 속하는 공지들을 찾아 셀에 추가
                     noticesToRender.forEach(notice => {
                         if (notice.date === fullDate) {
                             const isHighlighted = searchResultsToHighlight.some(hn => hn.id === notice.id);
@@ -170,11 +175,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     day++;
                 }
             }
-            if (day > daysInMonth) break;
+            if (day > daysInMonth) break; // 현재 월의 날짜를 모두 채웠으면 중단
         }
         calendarContainer.appendChild(table);
     }
 
+    // 공지 목록을 테이블 형태로 렌더링
     function renderNoticeList(noticesToRender, highlightedNotices = []) {
         if (!noticeListContainer) {
             console.error('필수 DOM 요소(noticeListContainer)가 없어 공지 목록을 렌더링할 수 없습니다.');
@@ -189,21 +195,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 const style = isHighlighted ? `style="background-color: ${n.color}; color: white;"` : '';
                 const date = new Date(n.date);
                 const formattedDate = `${String(date.getFullYear()).substring(2)}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
-                listHtml += `<tr data-id="${n.id}" style="cursor: pointer;"><td>${formattedDate}</td><td>${n.category || '미지정'}</td><td>${n.title}</td><td>${n.priority || '보통'}</td></tr>`;
+                listHtml += `<tr data-id="${n.id}" style="cursor: pointer;" ${style}><td>${formattedDate}</td><td>${n.category || '미지정'}</td><td>${n.title}</td><td>${n.priority || '보통'}</td></tr>`;
             });
         }
         listHtml += '</tbody></table>';
         noticeListContainer.innerHTML = listHtml;
     }
 
-    // 현재 월의 달력과 공지 목록을 모두 렌더링
+    // 현재 월의 달력과 공지 목록  렌더링
     function renderAll() {
         let currentMonthNotices = allNotices.filter(n =>
             new Date(n.date).getFullYear() === currentDate.getFullYear() &&
             new Date(n.date).getMonth() === currentDate.getMonth()
         );
 
-        // [수정] 공지 목록 날짜 내림차순 -> 중요도 내림차순으로 정렬 - 사용자 편의성
+        // [수정] 공지 정렬: 1순위날짜 오름차순, 2순위 중요도 내림차순 - 사용자 편의성
         const priorityOrder = { '높음': 3, '보통': 2, '낮음': 1 };
         currentMonthNotices.sort((a, b) => {
             const dateA = new Date(a.date);
@@ -222,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderNoticeList(currentMonthNotices);
     }
 
-    // 검색 조건에 따라 공지를 필터링하고 화면을 다시 렌더링
+    // 검색 조건에 따라 공지 필터링하고 화면 다시 렌더링
     function handleSearch() {
         if (!searchCategorySelect || !searchPrioritySelect || !searchKeywordInput) {
             console.error('필수 DOM 요소(searchCategorySelect, searchPrioritySelect, searchKeywordInput)가 없어 검색 기능을 수행할 수 없습니다.');
@@ -239,6 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const isSearching = category || priority || keyword;
 
+        // 검색 조건이 없으면 전체 목록을 다시 렌더링
         if (!isSearching) {
             renderAll();
             return;
@@ -252,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return categoryMatch && priorityMatch && keywordMatch;
         });
 
-        // [추가] 검색 결과 공지 목록 날짜 및 중요도 순으로 정렬 - 사용자 편의성
+        // [추가] 검색 결과도 날짜 및 중요도 순으로 정렬 - 사용자 편의성
         const priorityOrder = { '높음': 3, '보통': 2, '낮음': 1 };
         filteredNotices.sort((a, b) => {
             const dateA = new Date(a.date);
@@ -272,10 +279,10 @@ document.addEventListener('DOMContentLoaded', () => {
         renderNoticeList(filteredNotices);
     }
 
-    // 공지 추가 모달 열기
+    // 특정 날짜에 대한 공지 추가 모달 열기
     function openAddModal(date) {
-        if (!noticeForm || !noticeDateInput || !addModalInstance || !addModalEl || !noticeTitleInput) {
-            console.error('필수 DOM 요소(noticeForm, noticeDateInput, addModalInstance, addModalEl, noticeTitleInput)가 없어 공지 추가 모달을 열 수 없습니다.');
+        if (!noticeForm || !noticeDateInput || !addModalInstance) {
+            console.error('필수 DOM 요소가 없어 공지 추가 모달을 열 수 없습니다.');
             return;
         }
         noticeForm.reset();
@@ -286,18 +293,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // 공지 추가 모달 닫기
     function closeAddModal() {
         if (!noticeForm || !addModalInstance) {
-            console.error('필수 DOM 요소(noticeForm, addModalInstance)가 없어 공지 추가 모달을 닫을 수 없습니다.');
+            console.error('필수 DOM 요소가 없어 공지 추가 모달을 닫을 수 없습니다.');
             return;
         }
         noticeForm.reset();
         addModalInstance.hide();
     }
 
-    // 새 공지를 추가하고 로컬 스토리지에 저장
+    //폼 제출 시 새 공지 생성해서 로컬 스토리지에 저장
     function addNotice(e) {
         e.preventDefault();
         if (!noticeCategoryInput || !noticeDateInput || !noticeTitleInput || !noticeContentInput || !noticePrioritySelect) {
-            console.error('필수 DOM 요소(noticeCategoryInput, noticeDateInput, noticeTitleInput, noticeContentInput, noticePrioritySelect)가 없어 공지를 추가할 수 없습니다.');
+            console.error('필수 DOM 요소가 없어 공지를 추가할 수 없습니다.');
             return;
         }
         if (!noticeCategoryInput.value) {
@@ -320,10 +327,10 @@ document.addEventListener('DOMContentLoaded', () => {
         renderAll();
     }
 
-    // 공지 상세/수정 모달 열기
+    // ID를 이용해 특정 공지의 상세/수정 모달 열기
     function openDetailsModal(id) {
         if (!detailsIdInput || !detailsEditDateInput || !detailsEditTitleInput || !detailsEditContentInput || !detailsEditCategorySelect || !detailsEditPrioritySelect || !detailsModalInstance) {
-            console.error('필수 DOM 요소(detailsIdInput, detailsEditDateInput, detailsEditTitleInput, detailsEditContentInput, detailsEditCategorySelect, detailsEditPrioritySelect, detailsModalInstance)가 없어 공지 상세/수정 모달을 열 수 없습니다.');
+            console.error('필수 DOM 요소가 없어 공지 상세/수정 모달을 열 수 없습니다.');
             return;
         }
 
@@ -343,16 +350,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // 공지 상세/수정 모달 닫기
     function closeDetailsModal() {
         if (!detailsModalInstance) {
-            console.error('필수 DOM 요소(detailsModalInstance)가 없어 공지 상세/수정 모달을 닫을 수 없습니다.');
+            console.error('필수 DOM 요소가 없어 공지 상세/수정 모달을 닫을 수 없습니다.');
             return;
         }
         detailsModalInstance.hide();
     }
 
-    // 기존 공지 업데이트하고 로컬 스토리지에 저장
+    // 모달에서 수정한 공지 내용을 로컬 스토리지에 업데이트
     function updateNotice() {
         if (!detailsEditCategorySelect || !detailsEditDateInput || !detailsEditTitleInput || !detailsEditContentInput || !detailsEditPrioritySelect) {
-            console.error('필수 DOM 요소(detailsEditCategorySelect, detailsEditDateInput, detailsEditTitleInput, detailsEditContentInput, detailsEditPrioritySelect)가 없어 공지를 업데이트할 수 없습니다.');
+            console.error('필수 DOM 요소가 없어 공지를 업데이트할 수 없습니다.');
             return;
         }
         if (!detailsEditCategorySelect.value) {
@@ -376,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 공지를 삭제하고 로컬 스토리지에 저장
+    // 선택된 공지 삭제하고 로컬 스토리지에 저장
     function deleteNotice() {
         if (confirm('정말로 이 공지를 삭제하시겠습니까?')) {
             const noticeToDeleteId = Number(detailsIdInput.value);
@@ -387,6 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 년/월 입력 후 캘린더 렌더링 버튼
     if (renderBtn) renderBtn.addEventListener('click', () => {
         const year = parseInt(yearInput.value);
         const month = parseInt(monthInput.value) - 1;
@@ -396,9 +404,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 검색 버튼 클릭 및 엔터 키 입력 이벤트
     if (searchBtn) searchBtn.addEventListener('click', handleSearch);
     if (searchKeywordInput) searchKeywordInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') handleSearch(); });
 
+    // 캘린더 날짜 셀 또는 공지 아이템 클릭 이벤트
     if (calendarContainer) calendarContainer.addEventListener('click', (e) => {
         const noticeItem = e.target.closest('.notice-item');
         const cell = e.target.closest('td[data-date]');
@@ -411,6 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 공지 목록의 행 클릭 이벤트
     if (noticeListContainer) noticeListContainer.addEventListener('click', (e) => {
         const row = e.target.closest('tr[data-id]');
         if (row) {
@@ -419,14 +430,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 모달 내 버튼 이벤트
     if (noticeForm) noticeForm.addEventListener('submit', addNotice);
     if (deleteNoticeBtn) deleteNoticeBtn.addEventListener('click', deleteNotice);
     if (updateNoticeBtn) updateNoticeBtn.addEventListener('click', updateNotice);
+    if (cancelAddModalBtn) cancelAddModalBtn.addEventListener('click', closeAddModal);
+    if (cancelEditBtn) cancelEditBtn.addEventListener('click', closeDetailsModal);
 
+
+    // 공지 추가 모달이 열리면 제목 입력 필드에 자동 포커스
     if (addModalEl) {
         addModalEl.addEventListener('shown.bs.modal', () => noticeTitleInput.focus());
     }
 
+    // 다른 탭/창에서 로컬 스토리지가 변경되었을 때 UI 동기화
     window.addEventListener('storage', (e) => {
         if (e.key === getCategoriesKey()) {
             populateCategoryDropdowns();
@@ -436,16 +453,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 페이지 초기화 함수
     async function initialize() {
-        // 저장된 모든 공지를 불러오고 화면 구성
         allNotices = await fetchAnnouncements();
         populateCategoryDropdowns();
 
-        yearInput.value = currentDate.getFullYear();
-        monthInput.value = currentDate.getMonth() + 1;
+        if (yearInput) yearInput.value = currentDate.getFullYear();
+        if (monthInput) monthInput.value = currentDate.getMonth() + 1;
 
         renderAll();
     }
 
+    // 페이지 로드 시 초기화 함수 실행
     initialize();
 });
