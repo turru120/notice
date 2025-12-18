@@ -1,23 +1,17 @@
 {
-    "학사정보": {
+    "https:\/\/plus.cnu.ac.kr\/_prog\/_board\/?code=sub07_0702&site_dvs_cd=kr&menu_dvs_cd=0702": {
         "encoding": "UTF-8",
         "list_selector": "\/\/tbody\/tr",
         "title_selector": ".\/\/td[2]\/a",
         "date_selector": ".\/\/td[4]"
     },
-    "교육정보": {
+    "https:\/\/plus.cnu.ac.kr\/_prog\/_board\/?code=sub07_0704&site_dvs_cd=kr&menu_dvs_cd=0704": {
         "encoding": "UTF-8",
         "list_selector": "\/\/tbody\/tr",
         "title_selector": ".\/\/td[2]\/a",
         "date_selector": ".\/\/td[4]"
     },
-    "사업단": {
-        "encoding": "UTF-8",
-        "list_selector": "\/\/tbody\/tr",
-        "title_selector": ".\/\/td[2]\/a",
-        "date_selector": ".\/\/td[4]"
-    },
-    "드림스폰": {
+    "https:\/\/www.dreamspon.com\/scholarship\/list.html": {
         "encoding": "UTF-8",
         "list_selector": "\/\/div[@class='bo_table']\/\/tbody\/tr",
         "title_selector": ".\/\/td[@class='td_subject']\/\/p[@class='title']\/a",

@@ -53,7 +53,7 @@ try {
 
         // 정규화된 URL 재조립
         $normalized_url = (isset($url_parts['scheme']) ? $url_parts['scheme'] . '://' : '') .
-                          (isset($url_parts['host']) ? $url_parts['host'] : '');
+            (isset($url_parts['host']) ? $url_parts['host'] : '');
         if (isset($url_parts['path'])) {
             $normalized_url .= $url_parts['path'];
         }
